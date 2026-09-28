@@ -1,7 +1,7 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
+  --text: #68686c;
+  --text-h: #ffffff;
+  --bg: #000000;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
@@ -108,4 +108,84 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+.home-container {
+  padding: 40px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.mission-statment {
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+.about-us {
+}
+
+.about-us-card {
+   background-color: #1c1d1f;
+    padding: 30px;
+    border-radius: 10px;
+    width: 990px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    text-decoration: none;
+    text-align: left;
+    color: 68686c;
+}
+
+.links {
+display: grid;
+gap:20px;
+justify-content: left;
+grid-template-columns: repeat(3, 1fr);
+}
+
+.links-card {
+  background-color: #1c1d1f;
+  padding: 30px;
+  border-radius: 10px;
+  color: white;
+}
+
+.missions {
+display: grid;
+gap:20px;
+justify-content: left;
+grid-template-columns: repeat(2, 1fr);
+
+}
+
+.mission-card {
+background-color: #1c1d1f;
+    padding: 10px;
+    border-radius: 10px;
+    width: 150px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    text-decoration: none;
+    text-align: left;
+    color: #ffffff;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+
+    padding-top: 30px;
+    padding-right: 30px;
+    padding-left: 30px;
+
+    color: #ffffff;
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
 }
