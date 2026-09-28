@@ -1,0 +1,57 @@
+---
+components:
+  schemas:
+    MissionDetail:
+      type: object
+      properties:
+        mission_id:
+          type: integer
+        source_provider:
+          type: string
+        source_id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        target_body:
+          type: string
+        status:
+          type: string
+        image_url:
+          type: string
+          format: uri
+        agencies:
+          type: array
+          items:
+            type: object
+        spacecraft:
+          type: array
+          items:
+            type: object
+        launches:
+          type: array
+          items:
+            type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MissionListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            type: object

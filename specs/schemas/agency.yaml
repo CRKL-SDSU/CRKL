@@ -1,0 +1,47 @@
+---
+components:
+  schemas:
+    AgencyDetail:
+      type: object
+      properties:
+        agency_id:
+          type: integer
+        source_provider:
+          type: string
+        source_id:
+          type: string
+        name:
+          type: string
+        abbrev:
+          type: string
+        country_code:
+          type: string
+        image_url:
+          type: string
+          format: uri
+        missions:
+          type: array
+          items:
+            type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AgencyListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            type: object
