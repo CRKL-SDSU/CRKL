@@ -1,16 +1,42 @@
-# React + Vite
+# CRKL Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the Next.js frontend for exploring the CRKL REST API.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js and npm
+- A running CRKL API server
 
-## React Compiler
+## Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+From the repository root:
 
-## Expanding the ESLint configuration
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The development server runs at [http://localhost:3000](http://localhost:3000).
+Open `/` for the API console or `/explore` for the user-facing catalog.
+
+### Configure the API URL
+
+Set `NEXT_PUBLIC_API_BASE_URL` in `.env.local` to the API server's `/api/v1`
+base URL. The default points to an API running locally on port 8000:
+
+```dotenv
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+```
+
+The API must allow browser requests from the Next.js development origin
+(`http://localhost:3000`).
+
+## Other commands
+
+```bash
+npm run build      # Create a production build
+npm run start      # Serve the production build
+npm run typecheck  # Run the TypeScript checker
+```

@@ -1,0 +1,66 @@
+erDiagram
+    agencies ||--o{ mission_agencies : "participates_in"
+    missions ||--o{ mission_agencies : "involves_agencies"
+    launches ||--o{ mission_launches : "triggers"
+    missions ||--o{ mission_launches : "involves_launches"
+    spacecraft ||--o{ mission_spacecraft : "used_in"
+    missions ||--o{ mission_spacecraft : "utilizes_spacecraft"
+
+    agencies {
+        int agency_id PK "Surrogate key"
+        string source_provider "Data source (e.g., ll2)"
+        string source_id "Original ID from source"
+        string name
+        string abbrev
+        char country_code
+        string image_url
+    }
+
+    launches {
+        int launch_id PK "Surrogate key"
+        string source_provider "Data source (e.g., ll2)"
+        string source_id "Original UUID from source"
+        string name
+        datetime net
+        string status
+        string image_url
+        datetime window_start
+        datetime window_end
+    }
+
+    spacecraft {
+        int spacecraft_id PK "Surrogate key"
+        string source_provider "Data source (e.g., ll2)"
+        string source_id "Original ID from source"
+        string name
+        string spacecraft_type
+        string image_url
+    }
+
+    missions {
+        int mission_id PK "Surrogate key"
+        string source_provider "Data source (e.g., ll2)"
+        string source_id "Original ID from source"
+        string name
+        text description
+        string target_body
+        string status
+        string image_url
+    }
+
+    mission_agencies {
+        int mission_id PK, FK
+        int agency_id PK, FK
+        string role
+    }
+
+    mission_launches {
+        int mission_id PK, FK
+        int launch_id PK, FK
+    }
+
+    mission_spacecraft {
+        int mission_id PK, FK
+        int spacecraft_id PK, FK
+    }
+    

@@ -1,0 +1,49 @@
+---
+openapi: 3.0.3
+info:
+  title: Space Exploration API
+  version: 1.0.0
+  description: Design-first API specification mirroring Launch Library 2 (LL2) standards for space data.
+servers:
+  - url: /api/v1
+    description: Base API endpoint path
+
+paths:
+  /missions:
+    $ref: './paths/missions.yaml#/paths/missions_collection'
+  /missions/{id}:
+    $ref: './paths/missions.yaml#/paths/mission_item'
+
+  /agencies:
+    $ref: './paths/agencies.yaml#/paths/agencies_collection'
+  /agencies/{id}:
+    $ref: './paths/agencies.yaml#/paths/agency_item'
+
+  /spacecraft:
+    $ref: './paths/spacecraft.yaml#/paths/spacecraft_collection'
+  /spacecraft/{id}:
+    $ref: './paths/spacecraft.yaml#/paths/spacecraft_item'
+
+  /launches:
+    $ref: './paths/launches.yaml#/paths/launches_collection'
+  /launches/{id}:
+    $ref: './paths/launches.yaml#/paths/launch_item'
+
+components:
+  schemas:
+    MissionDetail:
+      $ref: './schemas/mission.yaml#/components/schemas/MissionDetail'
+    MissionListResponse:
+      $ref: './schemas/mission.yaml#/components/schemas/MissionListResponse'
+    AgencyDetail:
+      $ref: './schemas/agency.yaml#/components/schemas/AgencyDetail'
+    AgencyListResponse:
+      $ref: './schemas/agency.yaml#/components/schemas/AgencyListResponse'
+    SpacecraftDetail:
+      $ref: './schemas/spacecraft.yaml#/components/schemas/SpacecraftDetail'
+    SpacecraftListResponse:
+      $ref: './schemas/spacecraft.yaml#/components/schemas/SpacecraftListResponse'
+    LaunchDetail:
+      $ref: './schemas/launch.yaml#/components/schemas/LaunchDetail'
+    LaunchListResponse:
+      $ref: './schemas/launch.yaml#/components/schemas/LaunchListResponse'
