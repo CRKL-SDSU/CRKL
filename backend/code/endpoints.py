@@ -14,6 +14,12 @@ RESOURCE_CONFIG = {
     "spacecraft": ("spacecraft", "spacecraft_id"),
     "launches": ("launches", "launch_id"),
 }
+SEARCH_COLUMNS = {
+    "missions": ("name", "description", "target_body", "status", "source_provider", "source_id"),
+    "agencies": ("name", "abbrev", "country_code", "source_provider", "source_id"),
+    "spacecraft": ("name", "spacecraft_type", "source_provider", "source_id"),
+    "launches": ("name", "status", "source_provider", "source_id"),
+}
 
 
 def _database_error(error: pymysql.MySQLError) -> HTTPException:
@@ -22,36 +28,51 @@ def _database_error(error: pymysql.MySQLError) -> HTTPException:
 
 
 def _pagination_links(
-    request: Request, limit: int, offset: int, count: int
+    request: Request, limit: int, offset: int, count: int, search: str
 ) -> tuple[str | None, str | None]:
     next_url = None
     previous_url = None
     if offset + limit < count:
         next_url = str(
-            request.url.include_query_params(limit=limit, offset=offset + limit)
+            request.url.include_query_params(
+                limit=limit, offset=offset + limit, search=search
+            )
         )
     if offset > 0:
         previous_url = str(
-            request.url.include_query_params(limit=limit, offset=max(0, offset - limit))
+            request.url.include_query_params(
+                limit=limit, offset=max(0, offset - limit), search=search
+            )
         )
     return next_url, previous_url
 
 
 def _list_resource(
-    resource: str, request: Request, limit: int, offset: int
+    resource: str, request: Request, limit: int, offset: int, search: str
 ) -> dict[str, Any]:
     table, id_column = RESOURCE_CONFIG[resource]
+    search = search.strip()
+    where = ""
+    parameters: tuple[Any, ...] = ()
+    if search:
+        escaped_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        where = " WHERE " + " OR ".join(
+            f"{column} LIKE %s ESCAPE '\\\\'" for column in SEARCH_COLUMNS[resource]
+        )
+        parameters = tuple(f"%{escaped_search}%" for _ in SEARCH_COLUMNS[resource])
     try:
-        count_row = fetch_one(f"SELECT COUNT(*) AS count FROM {table}")
+        count_row = fetch_one(
+            f"SELECT COUNT(*) AS count FROM {table}{where}", parameters
+        )
         results = fetch_all(
-            f"SELECT * FROM {table} ORDER BY {id_column} LIMIT %s OFFSET %s",
-            (limit, offset),
+            f"SELECT * FROM {table}{where} ORDER BY {id_column} LIMIT %s OFFSET %s",
+            parameters + (limit, offset),
         )
     except pymysql.MySQLError as error:
         raise _database_error(error) from error
 
     count = int(count_row["count"]) if count_row else 0
-    next_url, previous_url = _pagination_links(request, limit, offset, count)
+    next_url, previous_url = _pagination_links(request, limit, offset, count, search)
     return {
         "count": count,
         "next": next_url,
@@ -83,8 +104,9 @@ def list_missions(
     request: Request,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    search: str = Query(default=""),
 ) -> dict[str, Any]:
-    return _list_resource("missions", request, limit, offset)
+    return _list_resource("missions", request, limit, offset, search)
 
 
 @router.get("/missions/{id}", summary="Get mission details")
@@ -127,8 +149,9 @@ def list_agencies(
     request: Request,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    search: str = Query(default=""),
 ) -> dict[str, Any]:
-    return _list_resource("agencies", request, limit, offset)
+    return _list_resource("agencies", request, limit, offset, search)
 
 
 @router.get("/agencies/{id}", summary="Get agency details")
@@ -155,8 +178,9 @@ def list_spacecraft(
     request: Request,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    search: str = Query(default=""),
 ) -> dict[str, Any]:
-    return _list_resource("spacecraft", request, limit, offset)
+    return _list_resource("spacecraft", request, limit, offset, search)
 
 
 @router.get("/spacecraft/{id}", summary="Get spacecraft details")
@@ -183,8 +207,9 @@ def list_launches(
     request: Request,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
+    search: str = Query(default=""),
 ) -> dict[str, Any]:
-    return _list_resource("launches", request, limit, offset)
+    return _list_resource("launches", request, limit, offset, search)
 
 
 @router.get("/launches/{id}", summary="Get launch details")

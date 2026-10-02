@@ -42,13 +42,14 @@ export default function ExplorePage() {
 
   async function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const term = query.trim().toLowerCase();
     setSearched(true);
     setLoading(true);
     setError("");
 
     try {
-      const response = await fetch(`${endpoint}?limit=100&offset=0`, {
+      const params = new URLSearchParams({ limit: "100", offset: "0" });
+      if (query.trim()) params.set("search", query.trim());
+      const response = await fetch(`${endpoint}?${params.toString()}`, {
         headers: { Accept: "application/json" }
       });
       const body: unknown = await response.json();
@@ -65,18 +66,13 @@ export default function ExplorePage() {
             ? body.filter((item): item is ApiRecord => typeof item === "object" && item !== null)
             : [];
 
-      const matching = term
-        ? records.filter((record) =>
-            JSON.stringify(record).toLowerCase().includes(term)
-          )
-        : records;
-      setResults(matching);
+      setResults(records);
       setTotal(
         typeof body === "object" &&
           body !== null &&
           typeof (body as { count?: unknown }).count === "number"
           ? (body as { count: number }).count
-          : matching.length
+          : records.length
       );
     } catch (requestError) {
       setResults([]);
