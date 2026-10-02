@@ -4,13 +4,24 @@
 
 # imported library for web framework
 from fastapi import FastAPI
-# connecting db_management.py to main
-from db_management import *
+from fastapi.middleware.cors import CORSMiddleware
+
+from db_management import database_connect
+from endpoints import router as api_router
 
 # creating our server instance
 app = FastAPI(title = "CRKL-Space", 
               description = "The official CRKL-Space web server.", 
               version = "1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
+
+app.include_router(api_router)
 
 # getting the root endpoint path to our server
 @app.get("/")
