@@ -4,19 +4,19 @@ from typing import Any, Iterator
 
 import pymysql
 from pymysql.cursors import DictCursor
-from dotenv import load_dotenv
 
-load_dotenv()
+from config import CONFIG
 
 
 @contextmanager
 def database_connection() -> Iterator[pymysql.connections.Connection]:
+    database = CONFIG["database"]
     connection = pymysql.connect(
-        host=os.getenv("db_host", "127.0.0.1"),
-        user=os.getenv("db_user", "root"),
-        password=os.getenv("db_password", ""),
-        database=os.getenv("db_name", "space_exploration_db"),
-        port=int(os.getenv("db_port", "3306")),
+        host=database["host"],
+        user=database["user"],
+        password=os.getenv("CRKL_MYSQL_PASSWORD", database["password"]),
+        database=database["name"],
+        port=int(database["port"]),
         cursorclass=DictCursor,
         connect_timeout=5,
     )
@@ -47,6 +47,6 @@ def database_connect() -> bool:
                 cursor.execute("SELECT 1;")
         return True
 
-    except pymysql.MySQLError as e:
-        print(f"ERROR: Failed to connect to space_exploration_db: {e}")
+    except pymysql.MySQLError as error:
+        print(f"ERROR: Failed to connect to crkl_db: {error}")
         return False
