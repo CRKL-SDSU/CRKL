@@ -1,4 +1,4 @@
-USE space_exploration_db;
+USE crkl_db;
 
 START TRANSACTION;
 

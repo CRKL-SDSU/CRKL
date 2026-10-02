@@ -21,3 +21,19 @@ the API to allow browser requests from the Next.js development origin.
 The user-facing catalog is available at `http://localhost:3000/explore`. It
 searches the selected resource collection returned by the API and displays
 matching records as result cards. The API console remains available at `/`.
+
+## Backend configuration
+
+Backend database settings are loaded from `backend/conf/local.yaml`. Create it
+from the example:
+
+```bash
+cp backend/conf/local.example.yaml backend/conf/local.yaml
+```
+
+The local file is ignored by Git. Set `CRKL_MYSQL_PASSWORD` to inject the MySQL
+password at runtime; it takes precedence over the YAML value:
+
+```bash
+export CRKL_MYSQL_PASSWORD='your_mysql_password'
+```

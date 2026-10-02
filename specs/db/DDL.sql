@@ -3,9 +3,9 @@
 -- Target Engine: MySQL / MariaDB
 -- =========================================================================
 
-DROP DATABASE IF EXISTS space_exploration_db;
-CREATE DATABASE space_exploration_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE space_exploration_db;
+DROP DATABASE IF EXISTS crkl_db;
+CREATE DATABASE crkl_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE crkl_db;
 
 -- =========================================================================
 -- 1. Master Data: Agencies Table
