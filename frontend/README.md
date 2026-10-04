@@ -39,4 +39,22 @@ The API must allow browser requests from the Next.js development origin
 npm run build      # Create a production build
 npm run start      # Serve the production build
 npm run typecheck  # Run the TypeScript checker
+npm test           # Run the frontend test suite once
+npm run test:watch # Run tests in watch mode
 ```
+
+## Tests
+
+Frontend tests use Vitest and Testing Library. They render components and mock
+API requests, so the backend and MySQL do not need to be running.
+
+From this directory:
+
+```bash
+npm install
+npm run typecheck
+npm test
+```
+
+GitHub Actions runs the type check and test suite automatically for pushes and
+pull requests.

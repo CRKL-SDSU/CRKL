@@ -20,6 +20,76 @@ SEARCH_COLUMNS = {
     "spacecraft": ("name", "spacecraft_type", "source_provider", "source_id"),
     "launches": ("name", "status", "source_provider", "source_id"),
 }
+RELATED_SEARCH = {
+    "missions": (
+        """EXISTS (
+            SELECT 1
+            FROM mission_agencies ma
+            JOIN agencies a ON a.agency_id = ma.agency_id
+            WHERE ma.mission_id = missions.mission_id
+              AND (a.name LIKE %s ESCAPE '\\\\'
+                   OR a.abbrev LIKE %s ESCAPE '\\\\'
+                   OR a.country_code LIKE %s ESCAPE '\\\\')
+        )
+        OR EXISTS (
+            SELECT 1
+            FROM mission_spacecraft ms
+            JOIN spacecraft s ON s.spacecraft_id = ms.spacecraft_id
+            WHERE ms.mission_id = missions.mission_id
+              AND (s.name LIKE %s ESCAPE '\\\\'
+                   OR s.spacecraft_type LIKE %s ESCAPE '\\\\')
+        )
+        OR EXISTS (
+            SELECT 1
+            FROM mission_launches ml
+            JOIN launches l ON l.launch_id = ml.launch_id
+            WHERE ml.mission_id = missions.mission_id
+              AND (l.name LIKE %s ESCAPE '\\\\'
+                   OR l.status LIKE %s ESCAPE '\\\\'
+                   OR l.source_id LIKE %s ESCAPE '\\\\')
+        )""",
+        ("a", "a", "a", "s", "s", "l", "l", "l"),
+    ),
+    "agencies": (
+        """EXISTS (
+            SELECT 1
+            FROM mission_agencies ma
+            JOIN missions m ON m.mission_id = ma.mission_id
+            WHERE ma.agency_id = agencies.agency_id
+              AND (m.name LIKE %s ESCAPE '\\\\'
+                   OR m.description LIKE %s ESCAPE '\\\\'
+                   OR m.target_body LIKE %s ESCAPE '\\\\'
+                   OR m.status LIKE %s ESCAPE '\\\\')
+        )""",
+        ("m", "m", "m", "m"),
+    ),
+    "spacecraft": (
+        """EXISTS (
+            SELECT 1
+            FROM mission_spacecraft ms
+            JOIN missions m ON m.mission_id = ms.mission_id
+            WHERE ms.spacecraft_id = spacecraft.spacecraft_id
+              AND (m.name LIKE %s ESCAPE '\\\\'
+                   OR m.description LIKE %s ESCAPE '\\\\'
+                   OR m.target_body LIKE %s ESCAPE '\\\\'
+                   OR m.status LIKE %s ESCAPE '\\\\')
+        )""",
+        ("m", "m", "m", "m"),
+    ),
+    "launches": (
+        """EXISTS (
+            SELECT 1
+            FROM mission_launches ml
+            JOIN missions m ON m.mission_id = ml.mission_id
+            WHERE ml.launch_id = launches.launch_id
+              AND (m.name LIKE %s ESCAPE '\\\\'
+                   OR m.description LIKE %s ESCAPE '\\\\'
+                   OR m.target_body LIKE %s ESCAPE '\\\\'
+                   OR m.status LIKE %s ESCAPE '\\\\')
+        )""",
+        ("m", "m", "m", "m"),
+    ),
+}
 
 
 def _database_error(error: pymysql.MySQLError) -> HTTPException:
@@ -28,27 +98,37 @@ def _database_error(error: pymysql.MySQLError) -> HTTPException:
 
 
 def _pagination_links(
-    request: Request, limit: int, offset: int, count: int, search: str
+    request: Request,
+    limit: int,
+    offset: int,
+    count: int,
+    search: str,
+    related: bool,
 ) -> tuple[str | None, str | None]:
     next_url = None
     previous_url = None
     if offset + limit < count:
         next_url = str(
             request.url.include_query_params(
-                limit=limit, offset=offset + limit, search=search
+                limit=limit, offset=offset + limit, search=search, related=str(related).lower()
             )
         )
     if offset > 0:
         previous_url = str(
             request.url.include_query_params(
-                limit=limit, offset=max(0, offset - limit), search=search
+                limit=limit, offset=max(0, offset - limit), search=search, related=str(related).lower()
             )
         )
     return next_url, previous_url
 
 
 def _list_resource(
-    resource: str, request: Request, limit: int, offset: int, search: str
+    resource: str,
+    request: Request,
+    limit: int,
+    offset: int,
+    search: str,
+    related: bool,
 ) -> dict[str, Any]:
     table, id_column = RESOURCE_CONFIG[resource]
     search = search.strip()
@@ -56,10 +136,17 @@ def _list_resource(
     parameters: tuple[Any, ...] = ()
     if search:
         escaped_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-        where = " WHERE " + " OR ".join(
+        conditions = [
             f"{column} LIKE %s ESCAPE '\\\\'" for column in SEARCH_COLUMNS[resource]
-        )
-        parameters = tuple(f"%{escaped_search}%" for _ in SEARCH_COLUMNS[resource])
+        ]
+        parameters_list = [f"%{escaped_search}%" for _ in SEARCH_COLUMNS[resource]]
+        if related:
+            conditions.append(RELATED_SEARCH[resource][0])
+            parameters_list.extend(
+                f"%{escaped_search}%" for _ in RELATED_SEARCH[resource][1]
+            )
+        where = " WHERE (" + " OR ".join(conditions) + ")"
+        parameters = tuple(parameters_list)
     try:
         count_row = fetch_one(
             f"SELECT COUNT(*) AS count FROM {table}{where}", parameters
@@ -72,7 +159,9 @@ def _list_resource(
         raise _database_error(error) from error
 
     count = int(count_row["count"]) if count_row else 0
-    next_url, previous_url = _pagination_links(request, limit, offset, count, search)
+    next_url, previous_url = _pagination_links(
+        request, limit, offset, count, search, related
+    )
     return {
         "count": count,
         "next": next_url,
@@ -105,8 +194,9 @@ def list_missions(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     search: str = Query(default=""),
+    related: bool = Query(default=True),
 ) -> dict[str, Any]:
-    return _list_resource("missions", request, limit, offset, search)
+    return _list_resource("missions", request, limit, offset, search, related)
 
 
 @router.get("/missions/{id}", summary="Get mission details")
@@ -150,8 +240,9 @@ def list_agencies(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     search: str = Query(default=""),
+    related: bool = Query(default=True),
 ) -> dict[str, Any]:
-    return _list_resource("agencies", request, limit, offset, search)
+    return _list_resource("agencies", request, limit, offset, search, related)
 
 
 @router.get("/agencies/{id}", summary="Get agency details")
@@ -179,8 +270,9 @@ def list_spacecraft(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     search: str = Query(default=""),
+    related: bool = Query(default=True),
 ) -> dict[str, Any]:
-    return _list_resource("spacecraft", request, limit, offset, search)
+    return _list_resource("spacecraft", request, limit, offset, search, related)
 
 
 @router.get("/spacecraft/{id}", summary="Get spacecraft details")
@@ -208,8 +300,9 @@ def list_launches(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     search: str = Query(default=""),
+    related: bool = Query(default=True),
 ) -> dict[str, Any]:
-    return _list_resource("launches", request, limit, offset, search)
+    return _list_resource("launches", request, limit, offset, search, related)
 
 
 @router.get("/launches/{id}", summary="Get launch details")

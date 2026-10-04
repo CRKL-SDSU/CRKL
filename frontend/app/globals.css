@@ -91,6 +91,9 @@ footer { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10px
 .search-filters { align-items: center; color: var(--muted); display: flex; font-family: "DM Mono", monospace; font-size: 10px; gap: 8px; justify-content: center; }
 .search-filters button { background: transparent; border: 1px solid transparent; color: var(--muted); font-family: inherit; font-size: inherit; padding: 7px 10px; }
 .search-filters button.active { border-color: var(--accent); color: var(--accent); }
+.related-search-toggle { align-items: center; color: var(--text); display: inline-flex; flex-wrap: wrap; font-size: 12px; gap: 8px; justify-content: center; margin-top: 20px; }
+.related-search-toggle input { accent-color: var(--accent); height: 15px; margin: 0; padding: 0; width: 15px; }
+.related-search-toggle small { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10px; width: 100%; }
 .results-section { min-height: 420px; padding: 42px 0; }
 .results-heading { align-items: end; display: flex; justify-content: space-between; margin-bottom: 24px; }
 .results-heading h2 { font-size: 22px; margin: 0; }

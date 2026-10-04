@@ -29,6 +29,7 @@ function titleFor(record: ApiRecord) {
 export default function ExplorePage() {
   const [query, setQuery] = useState("");
   const [resource, setResource] = useState<Resource>("missions");
+  const [includeRelated, setIncludeRelated] = useState(true);
   const [results, setResults] = useState<ApiRecord[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [searched, setSearched] = useState(false);
@@ -49,6 +50,7 @@ export default function ExplorePage() {
     try {
       const params = new URLSearchParams({ limit: "100", offset: "0" });
       if (query.trim()) params.set("search", query.trim());
+      params.set("related", String(includeRelated));
       const response = await fetch(`${endpoint}?${params.toString()}`, {
         headers: { Accept: "application/json" }
       });
@@ -138,6 +140,15 @@ export default function ExplorePage() {
             </button>
           ))}
         </div>
+        <label className="related-search-toggle">
+          <input
+            checked={includeRelated}
+            onChange={(event) => setIncludeRelated(event.target.checked)}
+            type="checkbox"
+          />
+          <span>Include related records</span>
+          <small>Search linked missions, agencies, spacecraft, and launches</small>
+        </label>
       </section>
 
       <section className="results-section">

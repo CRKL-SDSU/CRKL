@@ -37,3 +37,32 @@ password at runtime; it takes precedence over the YAML value:
 ```bash
 export CRKL_MYSQL_PASSWORD='your_mysql_password'
 ```
+
+## Tests
+
+The test suites do not require a running MySQL, backend, or frontend server.
+
+Run the backend tests from the repository root:
+
+```bash
+python3 -m pip install -r backend/requirements-ci.txt
+python3 -m pytest backend/tests
+```
+
+Run the frontend type check and tests:
+
+```bash
+cd frontend
+npm install
+npm run typecheck
+npm test
+```
+
+Run both suites from the repository root:
+
+```bash
+python3 -m pytest backend/tests && \
+  (cd frontend && npm run typecheck && npm test)
+```
+
+GitHub Actions runs both suites for pushes and pull requests.
