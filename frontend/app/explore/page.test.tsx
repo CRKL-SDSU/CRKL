@@ -48,4 +48,74 @@ describe("ExplorePage", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(fetchMock.mock.calls[0][0]).toContain("related=false");
   });
+
+  it("opens a record overlay and navigates to a related record", async () => {
+    const fetchMock = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            count: 1,
+            results: [{ launch_id: 7, name: "Test Launch" }]
+          }),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            launch_id: 7,
+            name: "Test Launch",
+            missions: [{ mission_id: 3, name: "Test Mission" }]
+          }),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ mission_id: 3, name: "Test Mission", agencies: [] }),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ launch_id: 7, name: "Test Launch", missions: [] }), {
+          status: 200
+        })
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ mission_id: 3, name: "Test Mission", agencies: [] }), {
+          status: 200
+        })
+      );
+
+    render(<ExplorePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Launches" }));
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    await waitFor(() => expect(screen.getByText("Test Launch")).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: /Test Launch/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("dialog")).toHaveTextContent("Test Mission")
+    );
+    expect(fetchMock.mock.calls[1][0]).toContain("/launches/7");
+
+    fireEvent.click(screen.getByRole("button", { name: /Test Mission/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("dialog")).toHaveTextContent("mission detail")
+    );
+    expect(fetchMock.mock.calls[2][0]).toContain("/missions/3");
+
+    fireEvent.click(screen.getByRole("button", { name: /Previous detail/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("dialog")).toHaveTextContent("Test Launch")
+    );
+    expect(fetchMock.mock.calls[3][0]).toContain("/launches/7");
+    expect(screen.getByRole("button", { name: /Next detail/i })).not.toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Next detail/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("dialog")).toHaveTextContent("Test Mission")
+    );
+    expect(fetchMock.mock.calls[4][0]).toContain("/missions/3");
+  });
 });

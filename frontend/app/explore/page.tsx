@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type Resource = "missions" | "agencies" | "spacecraft" | "launches";
 type ApiRecord = Record<string, unknown>;
+type DetailState = {
+  resource: Resource;
+  id: string | number;
+  record: ApiRecord | null;
+  loading: boolean;
+  error: string;
+};
+type DetailTarget = Pick<DetailState, "resource" | "id">;
 
 const resources: { value: Resource; label: string }[] = [
   { value: "missions", label: "Missions" },
@@ -26,6 +34,24 @@ function titleFor(record: ApiRecord) {
   return displayValue(record.name || record.title || record.mission_name);
 }
 
+const resourceIdKeys: Record<Resource, string> = {
+  missions: "mission_id",
+  agencies: "agency_id",
+  spacecraft: "spacecraft_id",
+  launches: "launch_id"
+};
+
+const relatedResourceByField: Record<string, Resource> = {
+  missions: "missions",
+  agencies: "agencies",
+  spacecraft: "spacecraft",
+  launches: "launches"
+};
+
+function resourceLabel(resource: Resource) {
+  return resource.slice(0, -1);
+}
+
 export default function ExplorePage() {
   const [query, setQuery] = useState("");
   const [resource, setResource] = useState<Resource>("missions");
@@ -35,11 +61,76 @@ export default function ExplorePage() {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [detail, setDetail] = useState<DetailState | null>(null);
+  const [detailHistory, setDetailHistory] = useState<DetailTarget[]>([]);
+  const [detailHistoryIndex, setDetailHistoryIndex] = useState(-1);
 
   const endpoint = useMemo(
     () => `${apiBaseUrl.replace(/\/$/, "")}/${resource}`,
     [resource]
   );
+
+  async function loadDetail(target: DetailTarget) {
+    setDetail({ ...target, record: null, loading: true, error: "" });
+    try {
+      const response = await fetch(
+        `${apiBaseUrl.replace(/\/$/, "")}/${target.resource}/${encodeURIComponent(String(target.id))}`,
+        { headers: { Accept: "application/json" } }
+      );
+      const body: unknown = await response.json();
+      if (!response.ok || typeof body !== "object" || body === null) {
+        throw new Error(`API returned ${response.status} ${response.statusText}`);
+      }
+      setDetail((current) =>
+        current ? { ...current, record: body as ApiRecord, loading: false } : current
+      );
+    } catch (requestError) {
+      setDetail((current) =>
+        current
+          ? {
+              ...current,
+              loading: false,
+              error:
+                requestError instanceof Error
+                  ? requestError.message
+                  : "Unable to load this record."
+            }
+          : current
+      );
+    }
+  }
+
+  function openDetail(nextResource: Resource, id: string | number) {
+    const target = { resource: nextResource, id };
+    setDetailHistory((current) => [
+      ...current.slice(0, detailHistoryIndex + 1),
+      target
+    ]);
+    setDetailHistoryIndex((current) => current + 1);
+    void loadDetail(target);
+  }
+
+  function moveDetailHistory(direction: -1 | 1) {
+    const nextIndex = detailHistoryIndex + direction;
+    const target = detailHistory[nextIndex];
+    if (!target) return;
+    setDetailHistoryIndex(nextIndex);
+    void loadDetail(target);
+  }
+
+  function closeDetail() {
+    setDetail(null);
+    setDetailHistory([]);
+    setDetailHistoryIndex(-1);
+  }
+
+  useEffect(() => {
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") closeDetail();
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, []);
 
   async function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -187,7 +278,12 @@ export default function ExplorePage() {
                     .filter(([key, value]) => key !== "name" && key !== "title" && typeof value !== "object")
                     .slice(0, 3);
                   return (
-                    <article className="result-card" key={`${String(identifier || "record")}-${index}`}>
+                    <button
+                      className="result-card"
+                      key={`${String(identifier || "record")}-${index}`}
+                      onClick={() => identifier && openDetail(resource, identifier)}
+                      type="button"
+                    >
                       <div className="result-card-top">
                         <span className="result-type">{resource.slice(0, -1)}</span>
                         {identifier && <span className="result-id">#{String(identifier)}</span>}
@@ -198,7 +294,7 @@ export default function ExplorePage() {
                           <span key={key}><b>{key.replaceAll("_", " ")}</b>{displayValue(value)}</span>
                         ))}
                       </div>
-                    </article>
+                    </button>
                   );
                 })}
               </div>
@@ -207,6 +303,106 @@ export default function ExplorePage() {
         )}
       </section>
       <footer>CRKL · Space data for curious minds</footer>
+      {detail && (
+        <div
+          aria-label="Record details"
+          className="detail-backdrop"
+          onClick={closeDetail}
+          role="presentation"
+        >
+          <section
+            aria-label={`${resourceLabel(detail.resource)} details`}
+            aria-modal="true"
+            className="detail-panel"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+          >
+            <div className="detail-header">
+              <div>
+                <p className="eyebrow">{resourceLabel(detail.resource)} detail</p>
+                <h2>{detail.record ? titleFor(detail.record) : "Loading record..."}</h2>
+              </div>
+              <div className="detail-actions">
+                <button
+                  aria-label="Previous detail"
+                  className="detail-nav"
+                  disabled={detailHistoryIndex <= 0}
+                  onClick={() => moveDetailHistory(-1)}
+                  type="button"
+                >
+                  ← Back
+                </button>
+                <button
+                  aria-label="Next detail"
+                  className="detail-nav"
+                  disabled={detailHistoryIndex >= detailHistory.length - 1}
+                  onClick={() => moveDetailHistory(1)}
+                  type="button"
+                >
+                  Forward →
+                </button>
+                <button
+                  aria-label="Close details"
+                  className="detail-close"
+                  onClick={closeDetail}
+                  type="button"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            {detail.loading && <div className="detail-loading">Loading record...</div>}
+            {detail.error && <div className="error-message">{detail.error}</div>}
+            {detail.record && !detail.loading && (
+              <>
+                <div className="detail-fields">
+                  {Object.entries(detail.record)
+                    .filter(([, value]) => !Array.isArray(value) && typeof value !== "object")
+                    .map(([key, value]) => (
+                      <div key={key}>
+                        <b>{key.replaceAll("_", " ")}</b>
+                        <span>{displayValue(value)}</span>
+                      </div>
+                    ))}
+                </div>
+                {Object.entries(detail.record)
+                  .filter(([, value]) => Array.isArray(value))
+                  .map(([field, value]) => (
+                    <section className="related-section" key={field}>
+                      <h3>{field.replaceAll("_", " ")}</h3>
+                      <div className="related-grid">
+                        {(value as unknown[]).map((item, index) => {
+                          if (typeof item !== "object" || item === null) return null;
+                          const relatedRecord = item as ApiRecord;
+                          const relatedResource = relatedResourceByField[field];
+                          const relatedId = relatedResource
+                            ? relatedRecord[resourceIdKeys[relatedResource]]
+                            : undefined;
+                          return (
+                            <button
+                              className="related-card"
+                              disabled={!relatedResource || (typeof relatedId !== "string" && typeof relatedId !== "number")}
+                              key={`${field}-${String(relatedId || index)}`}
+                              onClick={() =>
+                                relatedResource &&
+                                (typeof relatedId === "string" || typeof relatedId === "number") &&
+                                openDetail(relatedResource, relatedId)
+                              }
+                              type="button"
+                            >
+                              <span>{titleFor(relatedRecord)}</span>
+                              {relatedId !== undefined && <small>#{String(relatedId)}</small>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ))}
+              </>
+            )}
+          </section>
+        </div>
+      )}
     </main>
   );
 }
