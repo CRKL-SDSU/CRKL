@@ -20,6 +20,9 @@ npm run dev
 
 The development server runs at [http://localhost:3000](http://localhost:3000).
 Open `/` for the API console or `/explore` for the user-facing catalog.
+On `/explore`, click a result to open its detail overlay. Related missions,
+agencies, spacecraft, and launches are clickable, and the overlay provides
+Back and Forward navigation through the records you visit.
 
 ### Configure the API URL
 

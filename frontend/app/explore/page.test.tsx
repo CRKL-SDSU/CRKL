@@ -118,4 +118,35 @@ describe("ExplorePage", () => {
     );
     expect(fetchMock.mock.calls[4][0]).toContain("/missions/3");
   });
+
+  it("closes the detail overlay with Escape", async () => {
+    vi.spyOn(global, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            count: 1,
+            results: [{ launch_id: 7, name: "Test Launch" }]
+          }),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ launch_id: 7, name: "Test Launch", missions: [] }),
+          { status: 200 }
+        )
+      );
+
+    render(<ExplorePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    await waitFor(() => expect(screen.getByText("Test Launch")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /Test Launch/i }));
+    await waitFor(() => expect(screen.getByRole("dialog")).toBeInTheDocument());
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+  });
 });

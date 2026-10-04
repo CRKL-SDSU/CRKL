@@ -20,7 +20,9 @@ the API to allow browser requests from the Next.js development origin.
 
 The user-facing catalog is available at `http://localhost:3000/explore`. It
 searches the selected resource collection returned by the API and displays
-matching records as result cards. The API console remains available at `/`.
+matching records as result cards. Select a result to open its detail overlay,
+inspect related records, and navigate between related entities with the Back
+and Forward controls. The API console remains available at `/`.
 
 ## Backend configuration
 
