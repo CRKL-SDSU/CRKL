@@ -36,6 +36,17 @@ cd backend/code
 python3 main.py
 ```
 
+When using the repository `.envrc`, start the backend through direnv so
+`CRKL_MYSQL_PASSWORD` is available:
+
+```bash
+cd backend/code
+direnv exec ../.. python3 main.py
+```
+
+The frontend's Next.js BFF connects to this private API server. Do not expose
+port `8000` publicly when the frontend is deployed as the public entrypoint.
+
 Check that the service is running:
 
 ```bash

@@ -14,9 +14,15 @@ npm install
 npm run dev
 ```
 
-Set `NEXT_PUBLIC_API_BASE_URL` in `.env.local` to the API server's `/api/v1`
-base URL (for example, `http://localhost:8000/api/v1`). The frontend expects
-the API to allow browser requests from the Next.js development origin.
+Set `CRKL_BACKEND_URL` in the frontend server's `.env.local` to the private
+backend URL (for example, `http://127.0.0.1:8000`). Browser requests use the
+same-origin Next.js proxy at `/api/v1`; the backend URL is never exposed to
+client-side JavaScript. In a container network, use `http://backend:8000` and
+do not publish the backend port.
+
+The BFF entrypoint is `frontend/app/api/[...path]/route.ts`. It accepts the
+frontend's read-only resource requests and forwards them server-side to the
+backend. The browser must not call the backend URL directly.
 
 The user-facing catalog is available at `http://localhost:3000/explore`. It
 searches the selected resource collection returned by the API and displays

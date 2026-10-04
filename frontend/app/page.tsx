@@ -39,8 +39,7 @@ const resources: Record<
   }
 };
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+const apiBaseUrl = "/api/v1";
 
 function formatJson(value: unknown) {
   return JSON.stringify(value, null, 2);

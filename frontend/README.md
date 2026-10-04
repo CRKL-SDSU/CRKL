@@ -24,17 +24,28 @@ On `/explore`, click a result to open its detail overlay. Related missions,
 agencies, spacecraft, and launches are clickable, and the overlay provides
 Back and Forward navigation through the records you visit.
 
-### Configure the API URL
+### Configure the private backend
 
-Set `NEXT_PUBLIC_API_BASE_URL` in `.env.local` to the API server's `/api/v1`
-base URL. The default points to an API running locally on port 8000:
+The browser calls same-origin `/api/v1` paths. Next.js proxies those requests
+server-side to the backend, so the backend URL must not use a `NEXT_PUBLIC_*`
+variable:
 
 ```dotenv
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+CRKL_BACKEND_URL=http://127.0.0.1:8000
 ```
 
-The API must allow browser requests from the Next.js development origin
-(`http://localhost:3000`).
+In a private network deployment, use the backend service name instead:
+
+```dotenv
+CRKL_BACKEND_URL=http://backend:8000
+```
+
+Do not publish the backend port publicly. The frontend server is the only
+component that should reach it.
+
+The BFF entrypoint is `app/api/[...path]/route.ts`. It currently forwards
+read-only requests for missions, agencies, spacecraft, and launches. The
+browser calls `/api/v1/...`; only the Next.js server uses `CRKL_BACKEND_URL`.
 
 ## Other commands
 

@@ -7,6 +7,16 @@
 - The Next.js frontend runs from `frontend` with `npm run dev` on port `3000`.
 - `CRKL_MYSQL_PASSWORD` is loaded through `direnv` from the repository `.envrc`.
 - The backend health endpoint is `GET /api/v1/health`.
+- The browser uses same-origin `/api/v1/...` requests; it does not call the
+  backend directly.
+- The Next.js BFF entrypoint is `frontend/app/api/[...path]/route.ts`. It
+  reads the server-only `CRKL_BACKEND_URL` from `frontend/.env.local` and
+  forwards approved read-only resource requests to the backend.
+- `CRKL_BACKEND_URL=http://127.0.0.1:8000` is the local non-Docker value. The
+  backend port should remain private in deployments.
+- Start the backend with `direnv exec ../.. python3 main.py` when relying on
+  the repository `.envrc`; otherwise the MySQL password may be missing and API
+  requests can return `503 Database unavailable`.
 
 ## Search behavior
 

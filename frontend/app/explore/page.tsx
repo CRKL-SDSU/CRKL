@@ -21,8 +21,7 @@ const resources: { value: Resource; label: string }[] = [
   { value: "launches", label: "Launches" }
 ];
 
-const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+const apiBaseUrl = "/api/v1";
 
 function displayValue(value: unknown) {
   if (value === null || value === undefined || value === "") return "—";
