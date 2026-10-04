@@ -20,7 +20,9 @@ the API to allow browser requests from the Next.js development origin.
 
 The user-facing catalog is available at `http://localhost:3000/explore`. It
 searches the selected resource collection returned by the API and displays
-matching records as result cards. The API console remains available at `/`.
+matching records as result cards. Select a result to open its detail overlay,
+inspect related records, and navigate between related entities with the Back
+and Forward controls. The API console remains available at `/`.
 
 ## Backend configuration
 
@@ -37,3 +39,32 @@ password at runtime; it takes precedence over the YAML value:
 ```bash
 export CRKL_MYSQL_PASSWORD='your_mysql_password'
 ```
+
+## Tests
+
+The test suites do not require a running MySQL, backend, or frontend server.
+
+Run the backend tests from the repository root:
+
+```bash
+python3 -m pip install -r backend/requirements-ci.txt
+python3 -m pytest backend/tests
+```
+
+Run the frontend type check and tests:
+
+```bash
+cd frontend
+npm install
+npm run typecheck
+npm test
+```
+
+Run both suites from the repository root:
+
+```bash
+python3 -m pytest backend/tests && \
+  (cd frontend && npm run typecheck && npm test)
+```
+
+GitHub Actions runs both suites for pushes and pull requests.

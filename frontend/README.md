@@ -20,6 +20,9 @@ npm run dev
 
 The development server runs at [http://localhost:3000](http://localhost:3000).
 Open `/` for the API console or `/explore` for the user-facing catalog.
+On `/explore`, click a result to open its detail overlay. Related missions,
+agencies, spacecraft, and launches are clickable, and the overlay provides
+Back and Forward navigation through the records you visit.
 
 ### Configure the API URL
 
@@ -39,4 +42,22 @@ The API must allow browser requests from the Next.js development origin
 npm run build      # Create a production build
 npm run start      # Serve the production build
 npm run typecheck  # Run the TypeScript checker
+npm test           # Run the frontend test suite once
+npm run test:watch # Run tests in watch mode
 ```
+
+## Tests
+
+Frontend tests use Vitest and Testing Library. They render components and mock
+API requests, so the backend and MySQL do not need to be running.
+
+From this directory:
+
+```bash
+npm install
+npm run typecheck
+npm test
+```
+
+GitHub Actions runs the type check and test suite automatically for pushes and
+pull requests.
