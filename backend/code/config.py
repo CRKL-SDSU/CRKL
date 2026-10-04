@@ -1,10 +1,12 @@
+import os
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 
-CONFIG_PATH = Path(__file__).resolve().parents[1] / "conf" / "local.yaml"
+CONFIG_DIR = Path(__file__).resolve().parents[1] / "conf"
+CONFIG_PATH = Path(os.environ.get("CRKL_CONFIG_PATH", CONFIG_DIR / "local.yaml"))
 DEFAULT_CONFIG: dict[str, Any] = {
     "database": {
         "host": "127.0.0.1",

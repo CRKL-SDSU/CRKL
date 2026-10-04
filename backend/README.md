@@ -47,6 +47,16 @@ direnv exec ../.. python3 main.py
 The frontend's Next.js BFF connects to this private API server. Do not expose
 port `8000` publicly when the frontend is deployed as the public entrypoint.
 
+The default configuration file is `backend/conf/local.yaml`. To use another
+configuration such as `backend/conf/foobar.yaml`, set `CRKL_CONFIG_PATH`
+before starting the API:
+
+```bash
+export CRKL_CONFIG_PATH="$PWD/backend/conf/foobar.yaml"
+cd backend/code
+python3 main.py
+```
+
 Check that the service is running:
 
 ```bash

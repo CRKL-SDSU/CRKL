@@ -47,6 +47,15 @@ The BFF entrypoint is `app/api/[...path]/route.ts`. It currently forwards
 read-only requests for missions, agencies, spacecraft, and launches. The
 browser calls `/api/v1/...`; only the Next.js server uses `CRKL_BACKEND_URL`.
 
+Next.js does not automatically load arbitrary names such as `.env.foobar`.
+To run the foobar environment locally, copy it to `.env.local` before
+starting the server:
+
+```bash
+cp .env.foobar .env.local
+npm run dev
+```
+
 ## Other commands
 
 ```bash
