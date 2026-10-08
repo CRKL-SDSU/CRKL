@@ -158,15 +158,14 @@
 
   <main>
     <header>
-      <h1 class="title">CRKL User Guide</h1>
+      <h1 class="title">CRKL-Space User Guide</h1>
       <p class="subtitle">Space exploration catalog: searching, browsing, and the API console</p>
     </header>
 
-    <p>CRKL has two pages:</p>
+    <p>CRKL-Space:</p>
     <ul>
       <li><strong>Explore</strong> (<code>/explore</code>): the main catalog for searching and browsing.</li>
     </ul>
-    <p>You can switch between them with the links in the top bar.</p>
 
     <h2 id="catalog">What's in the catalog</h2>
     <div class="table-wrap">
@@ -209,10 +208,10 @@
           <tr><th>Searching in</th><th>Matches on</th></tr>
         </thead>
         <tbody>
-          <tr><td>Missions</td><td>name, description, target body, status, source provider, source ID</td></tr>
-          <tr><td>Agencies</td><td>name, abbreviation, country code, source provider, source ID</td></tr>
-          <tr><td>Spacecraft</td><td>name, spacecraft type, source provider, source ID</td></tr>
-          <tr><td>Launches</td><td>name, status, source provider, source ID</td></tr>
+          <tr><td>Missions</td><td>name, description, target body, status, source provider</td></tr>
+          <tr><td>Agencies</td><td>name, abbreviation, country code, source provider</td></tr>
+          <tr><td>Spacecraft</td><td>name, spacecraft type, source provider</td></tr>
+          <tr><td>Launches</td><td>name, status, source provider</td></tr>
         </tbody>
       </table>
     </div>
@@ -258,7 +257,7 @@
     <p>Click any result card to open its <strong>detail panel</strong>.</p>
     <p>The panel shows:</p>
     <ol>
-      <li><strong>All fields</strong> of the record (dates, status, source IDs, image URL, …). Empty values are shown as <code>—</code>.</li>
+      <li><strong>All fields</strong> of the record (dates, status, …). Empty values are shown as <code>—</code>.</li>
       <li><strong>Related records</strong>, grouped by type. A mission shows its <em>agencies</em> (including each agency's role), <em>spacecraft</em>, and <em>launches</em>. An agency, spacecraft, or launch shows its <em>missions</em>.</li>
     </ol>
 
