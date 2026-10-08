@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CRKL-Space Overview</title>
-<meta name="description" content="What CRKL-Space is, the problem it solves, its features, and how its database and application are built.">
+<meta name="description" content="What CRKL-Space is, the problem it solves, who it is for, and its key features.">
 <style>
   :root {
     --bg: #ffffff;
@@ -124,33 +124,6 @@
   .feature h3 { margin: 0 0 4px; font-size: 16px; }
   .feature p { margin: 0; font-size: 15px; color: var(--muted); }
 
-  .flow {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 14px;
-    font-size: 15px;
-  }
-  .flow span.node {
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface);
-  }
-  .flow span.node small { display: block; color: var(--muted); font-size: 12px; }
-  .flow span.arrow { color: var(--muted); }
-
-  figure { margin: 0 0 18px; }
-  figure img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
-  figcaption { margin-top: 6px; color: var(--muted); font-size: 14px; }
-
   .table-wrap { overflow-x: auto; margin: 0 0 18px; }
   table { width: 100%; border-collapse: collapse; font-size: 15px; }
   th, td {
@@ -192,9 +165,6 @@
       <li><a href="#users">Who it's for</a></li>
       <li><a href="#features">Key features</a></li>
       <li><a href="#data">The data</a></li>
-      <li><a href="#database">Database design</a></li>
-      <li><a href="#architecture">How it works</a></li>
-      <li><a href="#concepts">Course concepts applied</a></li>
       <li><a href="#status">Status and roadmap</a></li>
     </ul>
   </nav>
@@ -262,69 +232,6 @@
       </table>
     </div>
     <p>Every record keeps its upstream source (<code>source_provider</code>) and identifier (<code>source_id</code>), so it can be matched and updated when the catalog is synchronized with LL2.</p>
-
-    <h2 id="database">Database design</h2>
-    <p>The schema is mission-centric: four entity tables, with missions connected to the other three through junction tables.</p>
-    <figure>
-      <a href="images/er-diagram-light.png">
-      <picture>
-        <source srcset="images/er-diagram-dark.png" media="(prefers-color-scheme: dark)">
-        <img src="images/er-diagram-light.png" alt="Entity-relationship diagram: missions linked to agencies, spacecraft, and launches through the mission_agencies, mission_spacecraft, and mission_launches junction tables." loading="lazy">
-      </picture>
-      </a>
-      <figcaption>Entity-relationship diagram of the <code>crkl_db</code> schema. Select the diagram to open it full size.</figcaption>
-    </figure>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Table</th><th>Purpose</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>missions</code></td><td>Mission name, description, target body, and status</td></tr>
-          <tr><td><code>agencies</code></td><td>Organization name, abbreviation, and country</td></tr>
-          <tr><td><code>spacecraft</code></td><td>Spacecraft name and type</td></tr>
-          <tr><td><code>launches</code></td><td>Launch name, no-earlier-than date (NET), launch window, and status</td></tr>
-          <tr><td><code>mission_agencies</code></td><td>Links missions and agencies, with each agency's role (e.g. Primary, Contributor)</td></tr>
-          <tr><td><code>mission_spacecraft</code></td><td>Links missions and the spacecraft they use</td></tr>
-          <tr><td><code>mission_launches</code></td><td>Links missions and the launches that carry them</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h2 id="architecture">How it works</h2>
-    <div class="flow" aria-label="Request flow">
-      <span class="node">Browser<small>Explore page</small></span>
-      <span class="arrow">→</span>
-      <span class="node">Next.js frontend<small>same-origin proxy</small></span>
-      <span class="arrow">→</span>
-      <span class="node">FastAPI backend<small>REST API</small></span>
-      <span class="arrow">→</span>
-      <span class="node">MySQL 8<small><code>crkl_db</code></small></span>
-    </div>
-    <ul>
-      <li>The <strong>frontend</strong> (Next.js and React) serves the Explore page and forwards approved read-only requests to the backend, so the backend is never exposed to the browser.</li>
-      <li>The <strong>backend</strong> (Python and FastAPI) provides list and detail endpoints for each entity, with pagination, search, and related-record lookups.</li>
-      <li>The <strong>database</strong> (MySQL 8) holds the catalog. The application connects as a dedicated <code>crkl</code> user with access to <code>crkl_db</code> only.</li>
-    </ul>
-
-    <h2 id="concepts">Course concepts applied</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Concept</th><th>Where it appears</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>ER modeling</td><td>The ER diagram above, designed before the tables were created</td></tr>
-          <tr><td>Primary and foreign keys</td><td>Surrogate primary keys on every entity; foreign keys from each junction table, with <code>ON DELETE CASCADE</code></td></tr>
-          <tr><td>Normalization</td><td>Many-to-many relationships resolved into junction tables; the agency role is stored on the relationship, not the agency</td></tr>
-          <tr><td>Constraints</td><td><code>NOT NULL</code> on required fields, <code>UNIQUE</code> on <code>source_id</code>, composite primary keys on junction tables</td></tr>
-          <tr><td>Joins and subqueries</td><td>Detail pages join through junction tables; related-record search uses <code>EXISTS</code> subqueries</td></tr>
-          <tr><td>Aggregate functions</td><td><code>COUNT(*)</code> gives the total number of matches for pagination</td></tr>
-          <tr><td>Database programming</td><td>Parameterized SQL from Python (PyMySQL), with search input escaped before it reaches <code>LIKE</code></td></tr>
-          <tr><td>Access control</td><td>A least-privilege database user instead of <code>root</code></td></tr>
-        </tbody>
-      </table>
-    </div>
 
     <h2 id="status">Status and roadmap</h2>
     <p><strong>Phase 1 (current):</strong> a working prototype with the schema, sample data, REST API, and Explore page. Backend and frontend tests run automatically on GitHub for every change.</p>
