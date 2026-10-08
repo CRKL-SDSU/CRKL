@@ -14,7 +14,7 @@ def database_connection() -> Iterator[pymysql.connections.Connection]:
     connection = pymysql.connect(
         host=database["host"],
         user=database["user"],
-        password=os.getenv("CRKL_MYSQL_PASSWORD", database["password"]),
+        password=os.getenv("CRKL_DB_USER_PASSWORD", database["password"]),
         database=database["name"],
         port=int(database["port"]),
         cursorclass=DictCursor,

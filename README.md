@@ -73,7 +73,7 @@ prefixes their logs with `[backend]` and `[frontend]`.
    `local.yaml`:
 
    ```bash
-   export CRKL_MYSQL_PASSWORD='your_mysql_password'
+   export CRKL_DB_USER_PASSWORD='your_mysql_password'
    ```
 
    With [direnv](https://direnv.net/), put that line in an `.envrc` and run

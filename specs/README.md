@@ -79,7 +79,7 @@ flowchart TD
 
     subgraph Docker["Deployment and demos: docker compose up --build"]
         direction TB
-        d0["Create .env from .env.example<br/>MYSQL_ROOT_PASSWORD, CRKL_MYSQL_PASSWORD"] --> d1
+        d0["Create .env from .env.example<br/>CRKL_DB_ROOT_PASSWORD, CRKL_DB_USER_PASSWORD"] --> d1
         d1["Build backend and frontend images"] --> d2
         d2["Start mysql container<br/>first start: DDL.sql, dummy_data.sql, crkl user"] --> d3{mysql healthy?}
         d3 -- Yes --> d4["Start private backend container<br/>CRKL_CONFIG_PATH=conf/docker.yaml"]
@@ -89,7 +89,7 @@ flowchart TD
 
     subgraph Local["Local development: scripts/dev.sh"]
         direction TB
-        l0["Load CRKL_MYSQL_PASSWORD<br/>environment or direnv .envrc"] --> l1
+        l0["Load CRKL_DB_USER_PASSWORD<br/>environment or direnv .envrc"] --> l1
         l1["Check backend/conf/local.yaml,<br/>ports 3000 and 8000, dependencies"] --> l2
         l2["Start Homebrew mysql@8.0 if not running<br/>wait for 127.0.0.1:3306"] --> l3
         l3["Start backend: uvicorn --reload<br/>127.0.0.1:8000"] --> l4{backend connected<br/>to MySQL?}

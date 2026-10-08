@@ -1,5 +1,5 @@
 # Copy to backend/conf/local.yaml (ignored by Git) for local development.
-# The password is injected at runtime through CRKL_MYSQL_PASSWORD.
+# The password is injected at runtime through CRKL_DB_USER_PASSWORD.
 database:
   host: 127.0.0.1
   port: 3306

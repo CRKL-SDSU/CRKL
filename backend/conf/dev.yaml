@@ -2,5 +2,5 @@ database:
   host: 127.0.0.1
   port: 3306
   user: root
-  password: change-me or user CRKL_MYSQL_PASSWORD env variable
+  password: change-me or user CRKL_DB_USER_PASSWORD env variable
   name: crkl_db

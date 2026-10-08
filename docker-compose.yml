@@ -10,8 +10,9 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
-      CRKL_MYSQL_PASSWORD: ${CRKL_MYSQL_PASSWORD:?set CRKL_MYSQL_PASSWORD in .env}
+      # The mysql image requires this exact name; it is set from CRKL_DB_ROOT_PASSWORD.
+      MYSQL_ROOT_PASSWORD: ${CRKL_DB_ROOT_PASSWORD:?set CRKL_DB_ROOT_PASSWORD in .env}
+      CRKL_DB_USER_PASSWORD: ${CRKL_DB_USER_PASSWORD:?set CRKL_DB_USER_PASSWORD in .env}
     volumes:
       - mysql-data:/var/lib/mysql
       # Run once, in name order, when the data volume is empty.
@@ -21,7 +22,7 @@ services:
     healthcheck:
       # TCP login as the app user: fails until init has finished and the
       # real server (not the init-time temporary one) is accepting connections.
-      test: ["CMD-SHELL", "mysql -h 127.0.0.1 -u crkl -p\"$$CRKL_MYSQL_PASSWORD\" -e 'SELECT 1 FROM crkl_db.missions LIMIT 1' >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "mysql -h 127.0.0.1 -u crkl -p\"$$CRKL_DB_USER_PASSWORD\" -e 'SELECT 1 FROM crkl_db.missions LIMIT 1' >/dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -31,7 +32,7 @@ services:
     build: ./backend
     environment:
       CRKL_CONFIG_PATH: /app/conf/docker.yaml
-      CRKL_MYSQL_PASSWORD: ${CRKL_MYSQL_PASSWORD:?set CRKL_MYSQL_PASSWORD in .env}
+      CRKL_DB_USER_PASSWORD: ${CRKL_DB_USER_PASSWORD:?set CRKL_DB_USER_PASSWORD in .env}
     depends_on:
       mysql:
         condition: service_healthy

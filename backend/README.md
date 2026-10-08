@@ -21,7 +21,7 @@ Set the MySQL password through the environment. The environment variable takes
 precedence over the password in `local.yaml`:
 
 ```bash
-export CRKL_MYSQL_PASSWORD='your_mysql_password'
+export CRKL_DB_USER_PASSWORD='your_mysql_password'
 ```
 
 If using `direnv`, put that export in a repository `.envrc` file and run
@@ -37,7 +37,7 @@ python3 main.py
 ```
 
 When using the repository `.envrc`, start the backend through direnv so
-`CRKL_MYSQL_PASSWORD` is available:
+`CRKL_DB_USER_PASSWORD` is available:
 
 ```bash
 cd backend/code
