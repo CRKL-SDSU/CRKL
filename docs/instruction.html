@@ -77,7 +77,8 @@
     letter-spacing: .06em;
     text-transform: uppercase;
   }
-  nav.toc ul { list-style: none; margin: 0; padding: 0; }
+  nav.toc ul { list-style: none; margin: 0 0 24px; padding: 0; }
+  nav.toc a[aria-current="page"] { color: var(--text); font-weight: 600; }
   nav.toc li { margin: 4px 0; }
   nav.toc li.sub { padding-left: 14px; }
   nav.toc a { color: var(--muted); text-decoration: none; }
@@ -141,6 +142,11 @@
 <body>
 <div class="page">
   <nav class="toc" aria-label="Contents">
+    <p>Pages</p>
+    <ul>
+      <li><a href="overview.html">Overview</a></li>
+      <li><a href="instruction.html" aria-current="page">Instructions</a></li>
+    </ul>
     <p>Contents</p>
     <ul>
       <li><a href="#catalog">What's in the catalog</a></li>

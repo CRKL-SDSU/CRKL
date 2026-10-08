@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRKL-Space Overview</title>
+<meta name="description" content="What CRKL-Space is, the problem it solves, its features, and how its database and application are built.">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f5f7fb;
+    --text: #1d2330;
+    --muted: #5f6b7a;
+    --border: #d5dae3;
+    --accent: #2f5fb3;
+    --code-bg: #eef2f8;
+    --code-text: #1f3a5f;
+    --head-bg: #e8eef7;
+    --note-bg: #eef4ff;
+    --note-border: #2f5fb3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10141c;
+      --surface: #171c26;
+      --text: #e3e7ee;
+      --muted: #9aa5b5;
+      --border: #2c3443;
+      --accent: #8fb3ff;
+      --code-bg: #1e2635;
+      --code-text: #b9cdf5;
+      --head-bg: #1c2433;
+      --note-bg: #182235;
+      --note-border: #8fb3ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10141c;
+    --surface: #171c26;
+    --text: #e3e7ee;
+    --muted: #9aa5b5;
+    --border: #2c3443;
+    --accent: #8fb3ff;
+    --code-bg: #1e2635;
+    --code-text: #b9cdf5;
+    --head-bg: #1c2433;
+    --note-bg: #182235;
+    --note-border: #8fb3ff;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .page {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 760px);
+    gap: 48px;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  nav.toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    font-size: 14px;
+  }
+  nav.toc p {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  nav.toc ul { list-style: none; margin: 0 0 24px; padding: 0; }
+  nav.toc li { margin: 4px 0; }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); }
+  nav.toc a[aria-current="page"] { color: var(--text); font-weight: 600; }
+
+  header { margin-bottom: 32px; }
+  h1.title { margin: 0; font-size: 40px; line-height: 1.15; }
+  .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 19px; }
+  h2 {
+    margin: 48px 0 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 26px;
+    line-height: 1.25;
+  }
+  h3 { margin: 24px 0 6px; font-size: 18px; }
+  h2, h3 { scroll-margin-top: 16px; }
+  p, ul, ol { margin: 0 0 14px; }
+  li { margin: 4px 0; }
+  a { color: var(--accent); }
+
+  code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--code-bg);
+    color: var(--code-text);
+    font: 0.9em/1.4 "SFMono-Regular", Menlo, Consolas, "Roboto Mono", monospace;
+  }
+
+  .lead { font-size: 18px; }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 0 14px;
+  }
+  .feature {
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+  }
+  .feature h3 { margin: 0 0 4px; font-size: 16px; }
+  .feature p { margin: 0; font-size: 15px; color: var(--muted); }
+
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    font-size: 15px;
+  }
+  .flow span.node {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  .flow span.node small { display: block; color: var(--muted); font-size: 12px; }
+  .flow span.arrow { color: var(--muted); }
+
+  figure { margin: 0 0 18px; }
+  figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  figcaption { margin-top: 6px; color: var(--muted); font-size: 14px; }
+
+  .table-wrap { overflow-x: auto; margin: 0 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--head-bg); font-weight: 600; }
+
+  .note {
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-left: 4px solid var(--note-border);
+    border-radius: 0 6px 6px 0;
+    background: var(--note-bg);
+  }
+
+  @media (max-width: 860px) {
+    .page { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 28px 16px 56px; }
+    nav.toc { position: static; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; }
+    h1.title { font-size: 32px; }
+    .features { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="toc" aria-label="Contents">
+    <p>Pages</p>
+    <ul>
+      <li><a href="overview.html" aria-current="page">Overview</a></li>
+      <li><a href="instruction.html">Instructions</a></li>
+    </ul>
+    <p>On this page</p>
+    <ul>
+      <li><a href="#what">What CRKL-Space is</a></li>
+      <li><a href="#problem">The problem</a></li>
+      <li><a href="#users">Who it's for</a></li>
+      <li><a href="#features">Key features</a></li>
+      <li><a href="#data">The data</a></li>
+      <li><a href="#database">Database design</a></li>
+      <li><a href="#architecture">How it works</a></li>
+      <li><a href="#concepts">Course concepts applied</a></li>
+      <li><a href="#status">Status and roadmap</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <header>
+      <h1 class="title">CRKL-Space</h1>
+      <p class="subtitle">A searchable catalog of space missions, agencies, spacecraft, and launches</p>
+    </header>
+
+    <h2 id="what">What CRKL-Space is</h2>
+    <p class="lead">CRKL-Space is a database-driven web application for exploring space exploration data. It stores missions, the agencies that run them, the spacecraft they use, and the launches that carry them, and lets you search and move between these records through their relationships.</p>
+    <p>The data model follows <a href="https://thespacedevs.com/llapi">Launch Library 2</a> (LL2), a public API maintained by The Space Devs, so the catalog can later be filled with real launch and mission data.</p>
+
+    <h2 id="problem">The problem</h2>
+    <p>Information about spaceflight is spread across agency websites, news articles, and launch schedules. Each source describes one piece: a launch date, a spacecraft, a mission goal. Answering a connected question takes several searches, for example:</p>
+    <ul>
+      <li>Which missions is NASA taking part in, and in what role?</li>
+      <li>Which spacecraft have flown on missions to the Moon?</li>
+      <li>Which launches carry Mars missions?</li>
+    </ul>
+    <p>CRKL-Space stores these entities and the links between them in one relational database, so a single search can follow those connections.</p>
+
+    <h2 id="users">Who it's for</h2>
+    <ul>
+      <li><strong>Students and educators</strong> looking up missions and the organizations behind them.</li>
+      <li><strong>Space enthusiasts</strong> following upcoming launches and the spacecraft involved.</li>
+      <li><strong>Developers</strong> who want a small, read-only REST API over structured space data.</li>
+    </ul>
+
+    <h2 id="features">Key features</h2>
+    <div class="features">
+      <div class="feature">
+        <h3>One search box, four catalogs</h3>
+        <p>Search missions, agencies, spacecraft, or launches by name, description, target body, status, and more.</p>
+      </div>
+      <div class="feature">
+        <h3>Related-record search</h3>
+        <p>Find records through their links: searching missions for "NASA" returns every mission NASA takes part in.</p>
+      </div>
+      <div class="feature">
+        <h3>Linked detail view</h3>
+        <p>Open any record to see all its fields and related records, then click through to the next one.</p>
+      </div>
+      <div class="feature">
+        <h3>Browsing history</h3>
+        <p>Back and Forward controls in the detail panel retrace the path you took through the catalog.</p>
+      </div>
+    </div>
+    <p>See the <a href="instruction.html">Instructions</a> for how to use each feature.</p>
+
+    <h2 id="data">The data</h2>
+    <p>The Phase 1 prototype runs on a sample dataset in the LL2 format:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Entity</th><th>Records</th><th>Examples</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Agencies</td><td>5</td><td>NASA, ESA, JAXA, SpaceX, ISRO</td></tr>
+          <tr><td>Launches</td><td>20</td><td>Artemis IV SLS Flight, Falcon Heavy Interplanetary</td></tr>
+          <tr><td>Spacecraft</td><td>150</td><td>Orion Deep Space Variant, Aditya-L1 Solar Observatory</td></tr>
+          <tr><td>Missions</td><td>100</td><td>Lunar South Pole Habitation Scout, Martian Phobos Orbital Insertion</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Every record keeps its upstream source (<code>source_provider</code>) and identifier (<code>source_id</code>), so it can be matched and updated when the catalog is synchronized with LL2.</p>
+
+    <h2 id="database">Database design</h2>
+    <p>The schema is mission-centric: four entity tables, with missions connected to the other three through junction tables.</p>
+    <figure>
+      <a href="images/er-diagram-light.png">
+      <picture>
+        <source srcset="images/er-diagram-dark.png" media="(prefers-color-scheme: dark)">
+        <img src="images/er-diagram-light.png" alt="Entity-relationship diagram: missions linked to agencies, spacecraft, and launches through the mission_agencies, mission_spacecraft, and mission_launches junction tables." loading="lazy">
+      </picture>
+      </a>
+      <figcaption>Entity-relationship diagram of the <code>crkl_db</code> schema. Select the diagram to open it full size.</figcaption>
+    </figure>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Table</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>missions</code></td><td>Mission name, description, target body, and status</td></tr>
+          <tr><td><code>agencies</code></td><td>Organization name, abbreviation, and country</td></tr>
+          <tr><td><code>spacecraft</code></td><td>Spacecraft name and type</td></tr>
+          <tr><td><code>launches</code></td><td>Launch name, no-earlier-than date (NET), launch window, and status</td></tr>
+          <tr><td><code>mission_agencies</code></td><td>Links missions and agencies, with each agency's role (e.g. Primary, Contributor)</td></tr>
+          <tr><td><code>mission_spacecraft</code></td><td>Links missions and the spacecraft they use</td></tr>
+          <tr><td><code>mission_launches</code></td><td>Links missions and the launches that carry them</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="architecture">How it works</h2>
+    <div class="flow" aria-label="Request flow">
+      <span class="node">Browser<small>Explore page</small></span>
+      <span class="arrow">→</span>
+      <span class="node">Next.js frontend<small>same-origin proxy</small></span>
+      <span class="arrow">→</span>
+      <span class="node">FastAPI backend<small>REST API</small></span>
+      <span class="arrow">→</span>
+      <span class="node">MySQL 8<small><code>crkl_db</code></small></span>
+    </div>
+    <ul>
+      <li>The <strong>frontend</strong> (Next.js and React) serves the Explore page and forwards approved read-only requests to the backend, so the backend is never exposed to the browser.</li>
+      <li>The <strong>backend</strong> (Python and FastAPI) provides list and detail endpoints for each entity, with pagination, search, and related-record lookups.</li>
+      <li>The <strong>database</strong> (MySQL 8) holds the catalog. The application connects as a dedicated <code>crkl</code> user with access to <code>crkl_db</code> only.</li>
+    </ul>
+
+    <h2 id="concepts">Course concepts applied</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Concept</th><th>Where it appears</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>ER modeling</td><td>The ER diagram above, designed before the tables were created</td></tr>
+          <tr><td>Primary and foreign keys</td><td>Surrogate primary keys on every entity; foreign keys from each junction table, with <code>ON DELETE CASCADE</code></td></tr>
+          <tr><td>Normalization</td><td>Many-to-many relationships resolved into junction tables; the agency role is stored on the relationship, not the agency</td></tr>
+          <tr><td>Constraints</td><td><code>NOT NULL</code> on required fields, <code>UNIQUE</code> on <code>source_id</code>, composite primary keys on junction tables</td></tr>
+          <tr><td>Joins and subqueries</td><td>Detail pages join through junction tables; related-record search uses <code>EXISTS</code> subqueries</td></tr>
+          <tr><td>Aggregate functions</td><td><code>COUNT(*)</code> gives the total number of matches for pagination</td></tr>
+          <tr><td>Database programming</td><td>Parameterized SQL from Python (PyMySQL), with search input escaped before it reaches <code>LIKE</code></td></tr>
+          <tr><td>Access control</td><td>A least-privilege database user instead of <code>root</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="status">Status and roadmap</h2>
+    <p><strong>Phase 1 (current):</strong> a working prototype with the schema, sample data, REST API, and Explore page. Backend and frontend tests run automatically on GitHub for every change.</p>
+    <p><strong>Next steps:</strong></p>
+    <ul>
+      <li>Load real data from the LL2 API and keep it synchronized, with a log of each sync run.</li>
+      <li>Support launches and spacecraft that exist without a mission, such as test flights.</li>
+      <li>Add tags to group and filter missions.</li>
+      <li>Measure query performance as the dataset grows, and add indexes where searches slow down.</li>
+    </ul>
+    <p class="note">Ready to try it? Continue to the <a href="instruction.html">Instructions</a>.</p>
+  </main>
+</div>
+</body>
+</html>
