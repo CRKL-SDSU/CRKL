@@ -1,0 +1,55 @@
+# CRKL-Space: MySQL, FastAPI backend, and Next.js frontend.
+#
+#   cp .env.example .env    # then set the passwords
+#   docker compose up --build
+#
+# Open http://localhost:3000/explore. Only the frontend port is published;
+# the backend and database stay on the private Compose network.
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      CRKL_MYSQL_PASSWORD: ${CRKL_MYSQL_PASSWORD:?set CRKL_MYSQL_PASSWORD in .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # Run once, in name order, when the data volume is empty.
+      - ./specs/db/DDL.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./specs/db/dummy_data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+      - ./docker/mysql/03-app-user.sh:/docker-entrypoint-initdb.d/03-app-user.sh:ro
+    healthcheck:
+      # TCP login as the app user: fails until init has finished and the
+      # real server (not the init-time temporary one) is accepting connections.
+      test: ["CMD-SHELL", "mysql -h 127.0.0.1 -u crkl -p\"$$CRKL_MYSQL_PASSWORD\" -e 'SELECT 1 FROM crkl_db.missions LIMIT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  backend:
+    build: ./backend
+    environment:
+      CRKL_CONFIG_PATH: /app/conf/docker.yaml
+      CRKL_MYSQL_PASSWORD: ${CRKL_MYSQL_PASSWORD:?set CRKL_MYSQL_PASSWORD in .env}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,urllib.request,sys; r=json.load(urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health')); sys.exit(0 if 'connected' in r['database'] and 'dis' not in r['database'] else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  frontend:
+    build: ./frontend
+    environment:
+      CRKL_BACKEND_URL: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+volumes:
+  mysql-data:

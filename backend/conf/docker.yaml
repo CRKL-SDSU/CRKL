@@ -1,0 +1,8 @@
+# Used by docker-compose.yml (CRKL_CONFIG_PATH=/app/conf/docker.yaml).
+# The password is injected at runtime through CRKL_MYSQL_PASSWORD.
+database:
+  host: mysql
+  port: 3306
+  user: crkl
+  password: ""
+  name: crkl_db

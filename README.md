@@ -1,6 +1,29 @@
 # CRKL
 CS 514 Final Project
 
+## Run with Docker
+
+The quickest way to run CRKL-Space is Docker Compose, which starts MySQL (with
+the sample data), the FastAPI backend, and the Next.js frontend. You only need
+[Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+```bash
+cp .env.example .env      # then set both passwords in .env
+docker compose up --build
+```
+
+Open <http://localhost:3000/explore>. Only port 3000 is published; the backend
+and database are reachable only inside the Compose network.
+
+On first start, MySQL runs `specs/db/DDL.sql`, `specs/db/dummy_data.sql`, and
+`docker/mysql/03-app-user.sh`. The data is kept in the `mysql-data` volume
+across restarts. To reset it and reload the sample data:
+
+```bash
+docker compose down -v
+docker compose up
+```
+
 ## Frontend API console
 
 The `frontend/` directory contains a small Next.js app for testing the REST API
