@@ -149,4 +149,13 @@ describe("ExplorePage", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
   });
+
+  it("links to the project website from the footer", () => {
+    render(<ExplorePage />);
+
+    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute(
+      "href",
+      "https://crkl-sdsu.github.io/CRKL/"
+    );
+  });
 });

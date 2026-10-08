@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 
+import { aboutUrl } from "./site";
+
 type Resource = "missions" | "agencies" | "spacecraft" | "launches";
 type Operation = "collection" | "detail";
 
@@ -291,7 +293,10 @@ export default function Home() {
           )}
         </section>
       </div>
-      <footer>Built from the CRKL OpenAPI specification · JSON over REST</footer>
+      <footer>
+        Built from the CRKL OpenAPI specification · JSON over REST ·{" "}
+        <a href={aboutUrl}>About</a>
+      </footer>
     </main>
   );
 }
