@@ -2,8 +2,3 @@ node_modules
 .next
 .env*
 *.tsbuildinfo
-# Leftover Vite app; Next.js refuses to build with src/pages next to app/.
-src
-vite.config.js
-index.html
-eslint.config.js
