@@ -304,7 +304,7 @@ export default function ExplorePage() {
         )}
       </section>
       <footer>
-        CRKL · Space data for curious minds · <a href={aboutUrl}>About</a>
+        CRKL · Space data for curious minds · <a href={aboutUrl}>About Us</a>
       </footer>
       {detail && (
         <div

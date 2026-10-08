@@ -153,7 +153,7 @@ describe("ExplorePage", () => {
   it("links to the project website from the footer", () => {
     render(<ExplorePage />);
 
-    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "About Us" })).toHaveAttribute(
       "href",
       "https://crkl-sdsu.github.io/CRKL/"
     );

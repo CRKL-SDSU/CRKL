@@ -295,7 +295,7 @@ export default function Home() {
       </div>
       <footer>
         Built from the CRKL OpenAPI specification · JSON over REST ·{" "}
-        <a href={aboutUrl}>About</a>
+        <a href={aboutUrl}>About Us</a>
       </footer>
     </main>
   );
