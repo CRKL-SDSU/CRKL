@@ -52,7 +52,7 @@ database:
 Inject the password when starting the backend:
 
 ```bash
-export CRKL_MYSQL_PASSWORD='your_strong_password'
+export CRKL_DB_USER_PASSWORD='your_strong_password'
 ```
 
 The local configuration file and password are not committed to Git.

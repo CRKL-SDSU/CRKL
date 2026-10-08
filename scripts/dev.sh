@@ -9,7 +9,7 @@
 #
 # Needs: Homebrew mysql@8.0 with crkl_db loaded (specs/db/README.md),
 # backend/conf/local.yaml, Python packages from backend/requirements.txt,
-# and CRKL_MYSQL_PASSWORD (exported, or from a direnv .envrc).
+# and CRKL_DB_USER_PASSWORD (exported, or from a direnv .envrc).
 
 set -euo pipefail
 
@@ -37,11 +37,11 @@ wait_for() {  # wait_for <description> <seconds> <pid or -> <command...>
 
 # --- Configuration -----------------------------------------------------------
 
-if [[ -z "${CRKL_MYSQL_PASSWORD:-}" ]] && command -v direnv >/dev/null; then
+if [[ -z "${CRKL_DB_USER_PASSWORD:-}" ]] && command -v direnv >/dev/null; then
   eval "$(cd "$ROOT" && direnv export bash 2>/dev/null)" || true
 fi
-[[ -n "${CRKL_MYSQL_PASSWORD:-}" ]] ||
-  fail "CRKL_MYSQL_PASSWORD is not set. Export it, or add it to an .envrc and run 'direnv allow'."
+[[ -n "${CRKL_DB_USER_PASSWORD:-}" ]] ||
+  fail "CRKL_DB_USER_PASSWORD is not set. Export it, or add it to an .envrc and run 'direnv allow'."
 
 CONFIG="${CRKL_CONFIG_PATH:-$ROOT/backend/conf/local.yaml}"
 [[ -f "$CONFIG" ]] ||
