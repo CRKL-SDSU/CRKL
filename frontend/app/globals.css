@@ -80,6 +80,8 @@ h3 small { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10
 .history-url { color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .history-time { color: var(--muted); }
 footer { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10px; padding: 22px 0; text-align: right; }
+footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+footer a:hover { color: var(--accent); }
 .explore-shell { margin: auto; max-width: 1120px; padding: 0 36px 40px; }
 .search-hero { border-bottom: 1px solid var(--line); padding: 86px 0 44px; text-align: center; }
 .search-hero h1 { margin: 0 auto 15px; max-width: none; }

@@ -1,0 +1,84 @@
+# Local secrets (Docker Compose reads .env; see .env.example)
+.env
+
+# -----------------------------------------------------------------------------
+# AI coding agents: instruction files, local settings, caches, and histories
+# -----------------------------------------------------------------------------
+# Instruction / memory files (frontend/AGENTS.md and CLAUDE.md are re-created
+# by `next dev` in Next.js 16)
+AGENTS.md
+CLAUDE.md
+CLAUDE.local.md
+GEMINI.md
+.cursorrules
+.windsurfrules
+.clinerules
+.github/copilot-instructions.md
+.github/instructions/
+
+# Tool directories and configs
+.claude/
+.cursor/
+.windsurf/
+.gemini/
+.codex/
+.continue/
+.roo/
+.kiro/
+.aider*
+.mcp.json
+
+# -----------------------------------------------------------------------------
+# Editors and IDEs
+# -----------------------------------------------------------------------------
+# VS Code / Cursor
+.vscode/
+*.code-workspace
+.history/
+
+# JetBrains (IntelliJ, PyCharm, WebStorm)
+.idea/
+*.iml
+
+# Other editors
+.fleet/
+.zed/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+nbproject/
+
+# Vim / Emacs / backups
+*.swp
+*.swo
+*~
+\#*\#
+.\#*
+
+# -----------------------------------------------------------------------------
+# Operating systems
+# -----------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+.nfs*

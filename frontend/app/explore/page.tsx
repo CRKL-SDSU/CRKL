@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+import { aboutUrl } from "../site";
+
 type Resource = "missions" | "agencies" | "spacecraft" | "launches";
 type ApiRecord = Record<string, unknown>;
 type DetailState = {
@@ -301,7 +303,9 @@ export default function ExplorePage() {
           </>
         )}
       </section>
-      <footer>CRKL · Space data for curious minds</footer>
+      <footer>
+        CRKL · Space data for curious minds · <a href={aboutUrl}>About</a>
+      </footer>
       {detail && (
         <div
           aria-label="Record details"
