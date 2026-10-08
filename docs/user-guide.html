@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRKL User Guide</title>
+<meta name="description" content="Searching, browsing, and the API console in the CRKL space exploration catalog.">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f5f7fb;
+    --text: #1d2330;
+    --muted: #5f6b7a;
+    --border: #d5dae3;
+    --accent: #2f5fb3;
+    --code-bg: #eef2f8;
+    --code-text: #1f3a5f;
+    --head-bg: #e8eef7;
+    --note-bg: #eef4ff;
+    --note-border: #2f5fb3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10141c;
+      --surface: #171c26;
+      --text: #e3e7ee;
+      --muted: #9aa5b5;
+      --border: #2c3443;
+      --accent: #8fb3ff;
+      --code-bg: #1e2635;
+      --code-text: #b9cdf5;
+      --head-bg: #1c2433;
+      --note-bg: #182235;
+      --note-border: #8fb3ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10141c;
+    --surface: #171c26;
+    --text: #e3e7ee;
+    --muted: #9aa5b5;
+    --border: #2c3443;
+    --accent: #8fb3ff;
+    --code-bg: #1e2635;
+    --code-text: #b9cdf5;
+    --head-bg: #1c2433;
+    --note-bg: #182235;
+    --note-border: #8fb3ff;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .page {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 760px);
+    gap: 48px;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  nav.toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    font-size: 14px;
+  }
+  nav.toc p {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  nav.toc ul { list-style: none; margin: 0; padding: 0; }
+  nav.toc li { margin: 4px 0; }
+  nav.toc li.sub { padding-left: 14px; }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); }
+
+  header { margin-bottom: 32px; }
+  h1.title { margin: 0; font-size: 40px; line-height: 1.15; }
+  .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 19px; }
+  h2 {
+    margin: 48px 0 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 26px;
+    line-height: 1.25;
+  }
+  h3 { margin: 32px 0 8px; font-size: 19px; }
+  h2, h3 { scroll-margin-top: 16px; }
+  p, ul, ol { margin: 0 0 14px; }
+  li { margin: 4px 0; }
+  a { color: var(--accent); }
+
+  code {
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--code-bg);
+    color: var(--code-text);
+    font: 0.9em/1.4 "SFMono-Regular", Menlo, Consolas, "Roboto Mono", monospace;
+  }
+
+  .table-wrap { overflow-x: auto; margin: 0 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--head-bg); font-weight: 600; }
+
+  .note {
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-left: 4px solid var(--note-border);
+    border-radius: 0 6px 6px 0;
+    background: var(--note-bg);
+  }
+  .path {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    background: var(--surface);
+  }
+
+  @media (max-width: 860px) {
+    .page { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 28px 16px 56px; }
+    nav.toc { position: static; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; }
+    h1.title { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="toc" aria-label="Contents">
+    <p>Contents</p>
+    <ul>
+      <li><a href="#catalog">What's in the catalog</a></li>
+      <li><a href="#searching">Explore: searching the catalog</a></li>
+      <li class="sub"><a href="#choose">Choose what to search</a></li>
+      <li class="sub"><a href="#keyword">Type a keyword and press Search</a></li>
+      <li class="sub"><a href="#related">Include related records</a></li>
+      <li class="sub"><a href="#results">Read the results</a></li>
+      <li><a href="#details">Explore: viewing details</a></li>
+      <li class="sub"><a href="#links">Following links</a></li>
+      <li class="sub"><a href="#controls">Panel controls</a></li>
+      <li><a href="#messages">Messages you may see</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <header>
+      <h1 class="title">CRKL User Guide</h1>
+      <p class="subtitle">Space exploration catalog: searching, browsing, and the API console</p>
+    </header>
+
+    <p>CRKL has two pages:</p>
+    <ul>
+      <li><strong>Explore</strong> (<code>/explore</code>): the main catalog for searching and browsing.</li>
+    </ul>
+    <p>You can switch between them with the links in the top bar.</p>
+
+    <h2 id="catalog">What's in the catalog</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Resource</th><th>What it describes</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Missions</strong></td><td>A space mission, its target body, and its status</td><td><em>Mercury Magnetospheric Boundary Mapper</em></td></tr>
+          <tr><td><strong>Agencies</strong></td><td>An organization taking part in missions</td><td><em>NASA</em>, <em>ESA</em>, <em>JAXA</em>, <em>SpaceX</em>, <em>ISRO</em></td></tr>
+          <tr><td><strong>Spacecraft</strong></td><td>A vehicle or instrument platform</td><td><em>Orion Deep Space Variant</em></td></tr>
+          <tr><td><strong>Launches</strong></td><td>A launch event with its date, window, and status</td><td><em>Falcon Heavy Interplanetary</em></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Missions are the center of the catalog. Each mission can be linked to:</p>
+    <ul>
+      <li>several <strong>agencies</strong>, each with a role such as <em>Primary</em> or <em>Contributor</em></li>
+      <li>several <strong>spacecraft</strong></li>
+      <li>several <strong>launches</strong></li>
+    </ul>
+    <p>Agencies, spacecraft, and launches are connected to each other <strong>through missions</strong>. For example, to find the spacecraft an agency has used, open the agency, open one of its missions, then look at that mission's spacecraft.</p>
+
+    <h2 id="searching">Explore: searching the catalog</h2>
+    <p>Open <a href="http://localhost:3000/explore">http://localhost:3000/explore</a>.</p>
+
+    <h3 id="choose">Choose what to search</h3>
+    <p>Under the search box, select <strong>Search in</strong>: <em>Missions</em>, <em>Agencies</em>, <em>Spacecraft</em>, or <em>Launches</em>. The results always show records of this type. Switching type clears the current results.</p>
+
+    <h3 id="keyword">Type a keyword and press Search</h3>
+    <ul>
+      <li>Search is <strong>case-insensitive</strong> and matches <strong>anywhere inside</strong> a field. <code>orbit</code> finds <em>Martian Phobos Orbital Insertion</em>.</li>
+      <li>Multi-word input is treated as <strong>one phrase</strong>, not separate words. <code>solar observatory</code> matches <em>Aditya-L1 Solar Observatory</em> but not a record that only contains "solar" and "observatory" far apart.</li>
+      <li>Leave the box <strong>empty</strong> and press Search to list <strong>all</strong> records of the selected type.</li>
+    </ul>
+    <p>Fields searched for each type:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Searching in</th><th>Matches on</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Missions</td><td>name, description, target body, status, source provider, source ID</td></tr>
+          <tr><td>Agencies</td><td>name, abbreviation, country code, source provider, source ID</td></tr>
+          <tr><td>Spacecraft</td><td>name, spacecraft type, source provider, source ID</td></tr>
+          <tr><td>Launches</td><td>name, status, source provider, source ID</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="related">Include related records (on by default)</h3>
+    <p>When <strong>Include related records</strong> is checked, a record also matches if a <strong>linked</strong> record matches your keyword:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Searching in</th><th>Also matches when…</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Missions</td><td>a linked agency, spacecraft, or launch matches</td></tr>
+          <tr><td>Agencies / Spacecraft / Launches</td><td>a linked mission matches (name, description, target body, status)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Examples:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Search in</th><th>Keyword</th><th>Related on</th><th>Related off</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Missions</td><td><code>NASA</code></td><td>Every mission NASA takes part in</td><td>Only missions with "NASA" in their own text</td></tr>
+          <tr><td>Spacecraft</td><td><code>Moon</code></td><td>Spacecraft that flew on Moon missions</td><td>Only spacecraft with "Moon" in their name/type</td></tr>
+          <tr><td>Launches</td><td><code>Mars</code></td><td>Launches carrying Mars missions</td><td>Only launches with "Mars" in their name</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Uncheck the box for exact, single-table matching.</p>
+
+    <h3 id="results">Read the results</h3>
+    <p>The heading shows how many results are displayed and how many records matched in total. Each result card shows:</p>
+    <ul>
+      <li>the record type and its <strong>#ID</strong></li>
+      <li>the record name</li>
+      <li>a few key fields</li>
+    </ul>
+    <p class="note"><strong>Note:</strong> Explore displays up to <strong>100</strong> results per search. If more records match, use a more specific keyword.</p>
+
+    <h2 id="details">Explore: viewing details</h2>
+    <p>Click any result card to open its <strong>detail panel</strong>.</p>
+    <p>The panel shows:</p>
+    <ol>
+      <li><strong>All fields</strong> of the record (dates, status, source IDs, image URL, …). Empty values are shown as <code>—</code>.</li>
+      <li><strong>Related records</strong>, grouped by type. A mission shows its <em>agencies</em> (including each agency's role), <em>spacecraft</em>, and <em>launches</em>. An agency, spacecraft, or launch shows its <em>missions</em>.</li>
+    </ol>
+
+    <h3 id="links">Following links</h3>
+    <p>Click any related record to open it <strong>in the same panel</strong>. This lets you walk through the catalog, e.g.:</p>
+    <p class="path"><strong>NASA</strong> → <em>Lunar South Pole Habitation Scout</em> → <em>Orion Deep Space Variant</em> → every mission Orion flew on</p>
+
+    <h3 id="controls">Panel controls</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Control</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>← Back</strong></td><td>Return to the previous record you viewed</td></tr>
+          <tr><td><strong>Forward →</strong></td><td>Go forward again after using Back</td></tr>
+          <tr><td><strong>×</strong></td><td>Close the panel</td></tr>
+          <tr><td>Click outside the panel</td><td>Close the panel</td></tr>
+          <tr><td><code>Esc</code> key</td><td>Close the panel</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Back and Forward work like browser history. If you go back and then open a different record, the forward history is discarded. Closing the panel clears the history.</p>
+
+    <h2 id="messages">Messages you may see</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Message</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><em>Start exploring</em></td><td>No search has been run yet for this type.</td></tr>
+          <tr><td><em>No records matched your search.</em></td><td>The search ran, but nothing matched. Try a shorter keyword or turn on related records.</td></tr>
+          <tr><td><code>API returned 404 Not Found</code></td><td>That record ID does not exist.</td></tr>
+          <tr><td><code>API returned 502 Bad Gateway</code></td><td>The frontend cannot reach the backend. Is it running?</td></tr>
+          <tr><td><code>API returned 503 Service Unavailable</code></td><td>The backend cannot reach MySQL.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body>
+</html>
