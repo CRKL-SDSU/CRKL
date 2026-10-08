@@ -29,13 +29,13 @@ environment variable. The browser must not call the backend address directly.
 
 ## Deploy pipeline
 
-GitHub Actions (`.github/workflows/tests.yml`) runs the backend and frontend
+GitHub Actions (`.github/workflows/tests.yaml`) runs the backend and frontend
 jobs in parallel on every push and pull request. The frontend job also runs a
 production build. The workflow does not publish artifacts or deploy.
 
 The app can be run in two ways:
 
-- **Docker Compose** (`docker-compose.yml`), for deployment and demos: one
+- **Docker Compose** (`docker-compose.yaml`), for deployment and demos: one
   command builds the images and starts MySQL, the private FastAPI backend,
   and the public Next.js frontend. Health checks start each service only
   after the one it depends on is ready. On first start, MySQL loads the

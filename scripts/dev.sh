@@ -55,7 +55,7 @@ fi
 # --- Ports -------------------------------------------------------------------
 
 if port_in_use "$FRONTEND_PORT"; then
-  if docker compose -f "$ROOT/docker-compose.yml" ps --status running --services 2>/dev/null | grep -qx frontend; then
+  if docker compose -f "$ROOT/docker-compose.yaml" ps --status running --services 2>/dev/null | grep -qx frontend; then
     fail "Port $FRONTEND_PORT is used by the Docker frontend. Stop it with: docker compose stop frontend"
   fi
   fail "Port $FRONTEND_PORT is already in use."
