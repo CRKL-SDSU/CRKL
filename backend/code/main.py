@@ -1,5 +1,6 @@
+# Purpose: main.py sets up both our backend web server & API endpoints for the frontend
 
-# NOTE: A lot of the information regarding this web server, & what I used, can be found at: 
+# NOTE: A lot of the information regarding this web server & what I used can be found at: 
 # https://fastapi.tiangolo.com/tutorial/first-steps/
 
 # imported library for web framework
@@ -14,6 +15,7 @@ app = FastAPI(title = "CRKL-Space",
               description = "The official CRKL-Space web server.", 
               version = "1.0.0")
 
+# adding CORS (Cross-Origin Resource Sharing) middleware to our server, allowing requests from the localhost
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -21,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# including the API router to our server (see endpoints.py for the endpoints)
 app.include_router(api_router)
 
 # getting the root endpoint path to our server
