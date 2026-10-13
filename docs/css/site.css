@@ -191,7 +191,7 @@ grid-template-columns: repeat(3, 1fr);
 }
 
 .links-card {
-  background-color #ffff;
+  background-color: #ffff;
   padding: 30px;
   border-radius: 10px;
   color: #3f230a;
