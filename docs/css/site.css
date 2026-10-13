@@ -124,7 +124,7 @@ code {
 .hero {
   text-align: center;
   margin-bottom: 90px;
-  background-image: url('./pexels-zelch-12498782.jpg');
+  background-image: url('../pexels-zelch-12498782.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
