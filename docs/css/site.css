@@ -484,3 +484,21 @@ background-color: #1c1d1f;
   .doc-page figcaption { text-align: center; }
   .doc-page main a { color: #000000; }
 }
+
+/* Project Links: same side margins as the mission and team role cards. */
+.links {
+  margin: 0 50px 90px;
+}
+@media (max-width: 860px) {
+  .links {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
+
+.doc-page main h4 {
+  margin: 18px 0 6px;
+  font-size: 16px;
+  color: #3f230a;
+  scroll-margin-top: 16px;
+}
