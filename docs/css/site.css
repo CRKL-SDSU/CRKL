@@ -259,3 +259,30 @@ background-color: #1c1d1f;
 .nav-links a[aria-current="page"] {
   font-weight: 600;
 }
+
+/* About page: link from the team roles to the team page, and stack the
+   four-column card grids on narrow screens. */
+.team-link {
+  margin: -30px 50px 90px;
+}
+
+@media (max-width: 860px) {
+  .mission {
+    grid-template-columns: 1fr;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
+
+/* Dark mode: the page background turns dark, so headings and paragraphs that
+   sit directly on it need light colors. Text inside the white cards keeps its
+   dark colors. */
+@media (prefers-color-scheme: dark) {
+  .home-container > h2,
+  .home-container > h3 {
+    color: #f6c79a;
+  }
+  .mission-statment p {
+    color: var(--text-h);
+  }
+}

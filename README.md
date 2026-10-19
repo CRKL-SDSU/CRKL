@@ -5,6 +5,43 @@ CRKL-Space is a searchable catalog of space missions, agencies, spacecraft,
 and launches: a MySQL database, a FastAPI backend, and a Next.js frontend.
 Project website: <https://crkl-sdsu.github.io/CRKL/>
 
+## Original work and AI usage
+
+We used AI coding assistants during development, as allowed by the CS 514 AI
+policy. This section summarizes the original work beyond AI assistance and
+where AI was used.
+
+### Original work by the team
+
+| Member | Original work |
+| --- | --- |
+| Christopher | API research: evaluating space-data APIs such as Launch Library 2, the data they return, and their formats, for importing real data |
+| Kazuhiro | Data model and SQL: the mission-centric schema with junction tables, the search and related-record SQL (`EXISTS` subqueries over the junction tables), the **Include related records** option, and the attributes shown on search result cards |
+| Lia | Project structure, the first frontend pages (now in `legacy/vite-frontend`), and the project website (`docs/`: About, Team, styles) |
+| Ryan | Backend server skeleton (`backend/code/main.py`, `db_management.py`), the first database schema, and the code comments in the backend |
+
+**Design decisions made by the team:** basing the data model on Launch
+Library 2; reducing the original design to four core entities (agencies,
+missions, launches, spacecraft) connected through junction tables; keeping the
+backend and database private behind a Next.js proxy; and running search in
+MySQL instead of in the browser.
+
+### Where AI was used
+
+| Tool | Used for |
+| --- | --- |
+| GitHub Copilot, Claude Code | Implementing the FastAPI endpoints and the Next.js proxy from our OpenAPI spec and DDL; backend and frontend tests; the GitHub Actions CI workflow; Docker Compose and the local development script; the user guide and overview pages; rendering the ER diagram from `specs/db/diagram.mmd` |
+
+**How we reviewed AI output:** code changes went through pull requests;
+backend tests, frontend type checks and tests, and a production build run in
+GitHub Actions on every push; and queries were checked against MySQL with
+`EXPLAIN`.
+
+**About `Co-authored-by` trailers:** Git operations (commits, pushes, pull
+requests) were run through AI tools as a matter of habit, including for changes
+written by hand. A trailer shows that a commit was made through an AI tool, not
+that the AI wrote its content.
+
 ## Start the servers
 
 There are two ways to run CRKL-Space. Both serve the app at

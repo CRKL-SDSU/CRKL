@@ -150,6 +150,7 @@
     </ul>
     <p>Contents</p>
     <ul>
+      <li><a href="#run">Run CRKL-Space</a></li>
       <li><a href="#catalog">What's in the catalog</a></li>
       <li><a href="#searching">Explore: searching the catalog</a></li>
       <li class="sub"><a href="#choose">Choose what to search</a></li>
@@ -173,6 +174,17 @@
     <ul>
       <li><strong>Explore</strong> (<code>/explore</code>): the main catalog for searching and browsing.</li>
     </ul>
+
+    <h2 id="run">Run CRKL-Space</h2>
+    <p>CRKL-Space runs on your own computer. The quickest way needs only <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a>.</p>
+    <ol>
+      <li>Download the code: <code>git clone https://github.com/CRKL-SDSU/CRKL.git</code>, then open the <code>CRKL</code> folder.</li>
+      <li>Create the settings file: copy <code>.env.example</code> to <code>.env</code> and choose the two database passwords in it.</li>
+      <li>Start everything: <code>docker compose up --build</code>. The first start takes a few minutes while the database loads the sample data.</li>
+      <li>Open <a href="http://localhost:3000/explore">http://localhost:3000/explore</a> in your browser.</li>
+      <li>To stop, press <kbd>Ctrl</kbd>+<kbd>C</kbd>, then run <code>docker compose down</code>.</li>
+    </ol>
+    <p>For running without Docker, see the <a href="https://github.com/CRKL-SDSU/CRKL#start-the-servers">README</a>.</p>
 
     <h2 id="catalog">What's in the catalog</h2>
     <div class="table-wrap">
