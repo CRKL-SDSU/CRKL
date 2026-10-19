@@ -426,3 +426,61 @@ background-color: #1c1d1f;
 @media (prefers-color-scheme: dark) and (max-width: 860px) {
   .doc-page nav.toc p { color: #3f230a; }
 }
+
+/* Placeholder content still to be written. */
+.doc-page .todo {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 2px dashed #f6964d;
+  border-radius: 10px;
+  background: #fff8f1;
+  color: #7a3d0a;
+}
+
+/* Product document: figures, SQL listings, and a clean printed/PDF layout. */
+.doc-page figure {
+  margin: 0 0 22px;
+}
+.doc-page figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+}
+.doc-page figcaption {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #68686c;
+}
+.doc-page pre {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  border-radius: 10px;
+  background: #f4f3ec;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.doc-page pre code {
+  display: block;
+  padding: 0;
+  background: none;
+  white-space: pre;
+}
+
+@media print {
+  @page { size: letter; margin: 16mm 14mm; }
+  :root { background: #ffffff; color: #000000; color-scheme: light; font-size: 11pt; }
+  #root { border: 0; min-height: 0; }
+  .nav, .doc-page nav.toc, .no-print { display: none !important; }
+  .doc-page { display: block; padding: 0; }
+  .doc-page main { padding: 0; border-radius: 0; }
+  .doc-title { font-size: 26pt; }
+  .doc-page main h2 { break-after: avoid; }
+  .doc-page main h3 { break-after: avoid; }
+  .doc-page figure, .doc-page pre, .doc-page table { break-inside: avoid; }
+  .doc-page figure img { width: auto; max-width: 100%; max-height: 100mm; margin: 0 auto; }
+  .doc-page figcaption { text-align: center; }
+  .doc-page main a { color: #000000; }
+}
