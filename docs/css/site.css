@@ -286,3 +286,143 @@ background-color: #1c1d1f;
     color: var(--text-h);
   }
 }
+
+/* -------------------------------------------------------------------------
+   Overview and Instructions: the same look as The Team page (header menu,
+   brown headings, content on white cards), with a sticky contents menu.
+   ------------------------------------------------------------------------- */
+.doc-page {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 820px);
+  gap: 32px;
+  justify-content: center;
+  padding: 40px 30px 80px;
+  text-align: left;
+}
+
+.doc-page nav.toc {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  font-size: 15px;
+}
+.doc-page nav.toc p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3f230a;
+}
+.doc-page nav.toc ul { list-style: none; margin: 0; padding: 0; }
+.doc-page nav.toc li { margin: 6px 0; }
+.doc-page nav.toc li.sub { padding-left: 14px; }
+.doc-page nav.toc a { color: var(--text); text-decoration: none; }
+.doc-page nav.toc a:hover { color: var(--accent); }
+
+.doc-page main {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 30px 36px;
+  border-radius: 10px;
+  min-width: 0;
+}
+.doc-page header { margin-bottom: 24px; }
+.doc-title {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: #3f230a;
+}
+.doc-subtitle { margin-top: 6px; color: #68686c; }
+.doc-page main h2 {
+  margin: 40px 0 12px;
+  line-height: 1.25;
+  padding-top: 12px;
+  border-top: 1px solid #e5e4e7;
+  scroll-margin-top: 16px;
+}
+.doc-page main h3 {
+  margin: 24px 0 6px;
+  font-size: 18px;
+  scroll-margin-top: 16px;
+}
+.doc-page main p,
+.doc-page main ul,
+.doc-page main ol { margin: 0 0 14px; }
+.doc-page main li { margin: 4px 0; }
+.doc-page main a { color: #b85e1c; }
+.doc-page main code {
+  padding: 1px 6px;
+  font-size: 0.85em;
+  color: #3f230a;
+  background: #f4f3ec;
+}
+.doc-page .lead { font-size: 19px; }
+
+.doc-page .features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 14px;
+}
+.doc-page .feature {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #f4f3ec;
+}
+.doc-page .feature h3 { margin: 0 0 4px; font-size: 16px; }
+.doc-page .feature p { margin: 0; font-size: 15px; color: #444; }
+
+.doc-page .table-wrap { overflow-x: auto; margin: 0 0 18px; }
+.doc-page table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.doc-page th,
+.doc-page td {
+  padding: 8px 12px;
+  border: 1px solid #e5e4e7;
+  text-align: left;
+  vertical-align: top;
+}
+.doc-page th { background: #f4f3ec; color: #3f230a; font-weight: 600; }
+
+.doc-page .note,
+.doc-page .path {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fdf0e4;
+}
+
+@media (max-width: 860px) {
+  .doc-page {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 24px 16px 56px;
+  }
+  .doc-page nav.toc {
+    position: static;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .doc-page nav.toc a { color: #000000; }
+  .doc-page main { padding: 24px 18px; }
+  .doc-title { font-size: 32px; }
+  .doc-page .features { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Dark mode: text that sits on the dark page background (header logo, page
+   headings, the contents menu label) gets light colors. */
+@media (prefers-color-scheme: dark) {
+  .nav h2,
+  #root > div > h2 {
+    color: #f6c79a;
+  }
+  .doc-page nav.toc p {
+    color: #f6c79a;
+  }
+}
+@media (prefers-color-scheme: dark) and (max-width: 860px) {
+  .doc-page nav.toc p { color: #3f230a; }
+}
