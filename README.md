@@ -16,7 +16,7 @@ where AI was used.
 | Member | Original work |
 | --- | --- |
 | Christopher | API research: evaluating space-data APIs such as Launch Library 2, the data they return, and their formats, for importing real data |
-| Kazuhiro | Data model and SQL: the mission-centric schema with junction tables, the search and related-record SQL (`EXISTS` subqueries over the junction tables), the **Include related records** option, and the attributes shown on search result cards |
+| Kazuhiro | Data model, API endpoints, and SQL: the mission-centric schema with junction tables, the search and related-record SQL (`EXISTS` subqueries over the junction tables), the **Include related records** option, and the attributes shown on search result cards |
 | Lia | Project structure, the first frontend pages (now in `legacy/vite-frontend`), and the project website (`docs/`: About, Team, styles) |
 | Ryan | Backend server skeleton (`backend/code/main.py`, `db_management.py`), the first database schema, and the code comments in the backend |
 
@@ -66,7 +66,7 @@ the Next.js frontend. You only need
 [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 ```bash
-cp .env.example .env      # then set both passwords in .env
+cp .env.example .env      # then replace both placeholder passwords in .env with your own
 docker compose up --build
 ```
 
