@@ -65,6 +65,9 @@ Docker Compose starts MySQL (with the sample data), the FastAPI backend, and
 the Next.js frontend. You only need
 [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
+To run the exact version submitted for Phase 1, use the `phase1` tag:
+`git clone --branch phase1 https://github.com/CRKL-SDSU/CRKL.git`.
+
 ```bash
 cp .env.example .env      # then replace both placeholder passwords in .env with your own
 docker compose up --build
