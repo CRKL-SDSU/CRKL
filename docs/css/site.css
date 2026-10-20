@@ -259,3 +259,246 @@ background-color: #1c1d1f;
 .nav-links a[aria-current="page"] {
   font-weight: 600;
 }
+
+/* About page: link from the team roles to the team page, and stack the
+   four-column card grids on narrow screens. */
+.team-link {
+  margin: -30px 50px 90px;
+}
+
+@media (max-width: 860px) {
+  .mission {
+    grid-template-columns: 1fr;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
+
+/* Dark mode: the page background turns dark, so headings and paragraphs that
+   sit directly on it need light colors. Text inside the white cards keeps its
+   dark colors. */
+@media (prefers-color-scheme: dark) {
+  .home-container > h2,
+  .home-container > h3 {
+    color: #f6c79a;
+  }
+  .mission-statment p {
+    color: var(--text-h);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Overview and Instructions: the same look as The Team page (header menu,
+   brown headings, content on white cards), with a sticky contents menu.
+   ------------------------------------------------------------------------- */
+.doc-page {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 820px);
+  gap: 32px;
+  justify-content: center;
+  padding: 40px 30px 80px;
+  text-align: left;
+}
+
+.doc-page nav.toc {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  font-size: 15px;
+}
+.doc-page nav.toc p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3f230a;
+}
+.doc-page nav.toc ul { list-style: none; margin: 0; padding: 0; }
+.doc-page nav.toc li { margin: 6px 0; }
+.doc-page nav.toc li.sub { padding-left: 14px; }
+.doc-page nav.toc a { color: var(--text); text-decoration: none; }
+.doc-page nav.toc a:hover { color: var(--accent); }
+
+.doc-page main {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 30px 36px;
+  border-radius: 10px;
+  min-width: 0;
+}
+.doc-page header { margin-bottom: 24px; }
+.doc-title {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: #3f230a;
+}
+.doc-subtitle { margin-top: 6px; color: #68686c; }
+.doc-page main h2 {
+  margin: 40px 0 12px;
+  line-height: 1.25;
+  padding-top: 12px;
+  border-top: 1px solid #e5e4e7;
+  scroll-margin-top: 16px;
+}
+.doc-page main h3 {
+  margin: 24px 0 6px;
+  font-size: 18px;
+  scroll-margin-top: 16px;
+}
+.doc-page main p,
+.doc-page main ul,
+.doc-page main ol { margin: 0 0 14px; }
+.doc-page main li { margin: 4px 0; }
+.doc-page main a { color: #b85e1c; }
+.doc-page main code {
+  padding: 1px 6px;
+  font-size: 0.85em;
+  color: #3f230a;
+  background: #f4f3ec;
+}
+.doc-page .lead { font-size: 19px; }
+
+.doc-page .features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 14px;
+}
+.doc-page .feature {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #f4f3ec;
+}
+.doc-page .feature h3 { margin: 0 0 4px; font-size: 16px; }
+.doc-page .feature p { margin: 0; font-size: 15px; color: #444; }
+
+.doc-page .table-wrap { overflow-x: auto; margin: 0 0 18px; }
+.doc-page table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.doc-page th,
+.doc-page td {
+  padding: 8px 12px;
+  border: 1px solid #e5e4e7;
+  text-align: left;
+  vertical-align: top;
+}
+.doc-page th { background: #f4f3ec; color: #3f230a; font-weight: 600; }
+
+.doc-page .note,
+.doc-page .path {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fdf0e4;
+}
+
+@media (max-width: 860px) {
+  .doc-page {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 24px 16px 56px;
+  }
+  .doc-page nav.toc {
+    position: static;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .doc-page nav.toc a { color: #000000; }
+  .doc-page main { padding: 24px 18px; }
+  .doc-title { font-size: 32px; }
+  .doc-page .features { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Dark mode: text that sits on the dark page background (header logo, page
+   headings, the contents menu label) gets light colors. */
+@media (prefers-color-scheme: dark) {
+  .nav h2,
+  #root > div > h2 {
+    color: #f6c79a;
+  }
+  .doc-page nav.toc p {
+    color: #f6c79a;
+  }
+}
+@media (prefers-color-scheme: dark) and (max-width: 860px) {
+  .doc-page nav.toc p { color: #3f230a; }
+}
+
+/* Placeholder content still to be written. */
+.doc-page .todo {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border: 2px dashed #f6964d;
+  border-radius: 10px;
+  background: #fff8f1;
+  color: #7a3d0a;
+}
+
+/* Product document: figures, SQL listings, and a clean printed/PDF layout. */
+.doc-page figure {
+  margin: 0 0 22px;
+}
+.doc-page figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+}
+.doc-page figcaption {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #68686c;
+}
+.doc-page pre {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  border-radius: 10px;
+  background: #f4f3ec;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.doc-page pre code {
+  display: block;
+  padding: 0;
+  background: none;
+  white-space: pre;
+}
+
+@media print {
+  @page { size: letter; margin: 16mm 14mm; }
+  :root { background: #ffffff; color: #000000; color-scheme: light; font-size: 11pt; }
+  #root { border: 0; min-height: 0; }
+  .nav, .doc-page nav.toc, .no-print { display: none !important; }
+  .doc-page { display: block; padding: 0; }
+  .doc-page main { padding: 0; border-radius: 0; }
+  .doc-title { font-size: 26pt; }
+  .doc-page main h2 { break-after: avoid; }
+  .doc-page main h3 { break-after: avoid; }
+  .doc-page figure, .doc-page pre, .doc-page table { break-inside: avoid; }
+  .doc-page figure img { width: auto; max-width: 100%; max-height: 100mm; margin: 0 auto; }
+  .doc-page figcaption { text-align: center; }
+  .doc-page main a { color: #000000; }
+}
+
+/* Project Links: same side margins as the mission and team role cards. */
+.links {
+  margin: 0 50px 90px;
+}
+@media (max-width: 860px) {
+  .links {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
+
+.doc-page main h4 {
+  margin: 18px 0 6px;
+  font-size: 16px;
+  color: #3f230a;
+  scroll-margin-top: 16px;
+}

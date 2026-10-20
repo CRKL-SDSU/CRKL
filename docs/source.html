@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source Code &amp; Executable · CRKL-Space</title>
+<meta name="description" content="CRKL-Space source code on GitHub, how to run it, the team's original work beyond AI assistance, and where AI was used.">
+<link rel="stylesheet" href="css/site.css?v=20261019b">
+</head>
+<body>
+<div id="root">
+   <nav class="nav">
+            <h2>CRKL</h2>
+
+            <div class="nav-links">
+                <a href="index.html">About Us</a>
+                <a href="team.html">The Team</a>
+                <a href="overview.html">Overview</a>
+                <a href="instructions.html">Instructions</a>
+                <a href="source.html" aria-current="page">Source Code</a>
+            </div>
+
+        </nav>
+
+<div class="doc-page">
+  <nav class="toc" aria-label="Contents">
+    <p>Contents</p>
+    <ul>
+      <li><a href="#repo">GitHub repository</a></li>
+      <li><a href="#run">Executable: run it locally</a></li>
+      <li class="sub"><a href="#run-need">What you need</a></li>
+      <li class="sub"><a href="#run-code">1. Get the code</a></li>
+      <li class="sub"><a href="#run-configure">2. Configure</a></li>
+      <li class="sub"><a href="#run-start">3. Start</a></li>
+      <li class="sub"><a href="#run-check">4. Check that it works</a></li>
+      <li class="sub"><a href="#run-stop">5. Stop and reset</a></li>
+      <li class="sub"><a href="#run-trouble">Troubleshooting</a></li>
+      <li><a href="#original">Original work beyond AI assistance</a></li>
+      <li><a href="#ai">AI usage</a></li>
+      <li class="sub"><a href="#ai-how-we-used-ai">How we used AI</a></li>
+      <li class="sub"><a href="#ai-how-much">How much</a></li>
+      <li class="sub"><a href="#ai-what-the-team-decided-and-what-ai-did">What the team decided, and what AI did</a></li>
+      <li class="sub"><a href="#ai-how-we-worked-with-ai">How we worked with AI</a></li>
+      <li class="sub"><a href="#ai-how-we-checked-ai-output">How we checked AI output</a></li>
+      <li class="sub"><a href="#ai-how-we-modified-and-extended-ai-output">How we modified and extended AI output</a></li>
+      <li class="sub"><a href="#ai-about-ai-co-authors-in-our-git-history">About AI co-authors in our Git history</a></li>
+      <li class="sub"><a href="#ai-the-demo-video-and-sample-data">The demo video and sample data</a></li>
+      <li class="sub"><a href="#ai-what-we-learned">What we learned</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <header>
+      <h1 class="doc-title">Source Code &amp; Executable</h1>
+      <p class="doc-subtitle">Where the code is, how to run it, and what we built ourselves</p>
+    </header>
+
+    <h2 id="repo">GitHub repository</h2>
+    <p>All of CRKL-Space's code is on GitHub: <a href="https://github.com/CRKL-SDSU/CRKL">github.com/CRKL-SDSU/CRKL</a>.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Folder</th><th>Contents</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>backend/</code></td><td>FastAPI application (<code>code/</code>), configuration (<code>conf/</code>), tests (<code>tests/</code>), and Dockerfile</td></tr>
+          <tr><td><code>frontend/</code></td><td>Next.js application (<code>app/</code>) with the Explore page and its tests, and Dockerfile</td></tr>
+          <tr><td><code>specs/</code></td><td>OpenAPI specification, database DDL and sample data, and ER diagram</td></tr>
+          <tr><td><code>docker-compose.yaml</code>, <code>docker/</code></td><td>Docker Compose setup and the MySQL application-user script</td></tr>
+          <tr><td><code>scripts/dev.sh</code></td><td>Local development startup script (without Docker)</td></tr>
+          <tr><td><code>docs/</code></td><td>This website, published with GitHub Pages</td></tr>
+          <tr><td><code>.github/workflows/</code></td><td>CI: backend tests, frontend type check and tests, and a production build</td></tr>
+          <tr><td><code>legacy/vite-frontend/</code></td><td>Our first frontend prototype, kept for reference</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="run">Executable: run it locally</h2>
+    <p>CRKL-Space runs as three services: a <strong>MySQL 8.0</strong> database with our sample data, a <strong>FastAPI</strong> backend, and a <strong>Next.js</strong> frontend. Docker Compose builds and starts all three with one command, so you don't need to install MySQL, Python, or Node.js.</p>
+
+    <h3 id="run-need">What you need</h3>
+    <ul>
+      <li><a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a> (macOS, Windows, or Linux), <strong>running</strong> before you start.</li>
+      <li><a href="https://git-scm.com/downloads">Git</a>, or download the code as a ZIP file from GitHub instead.</li>
+      <li>Port <strong>3000</strong> free on your computer. It's the only port CRKL-Space uses.</li>
+      <li>An internet connection the first time, to download the MySQL, Python, and Node.js images.</li>
+    </ul>
+
+    <h3 id="run-code">1. Get the code</h3>
+    <p>Clone the repository and open its folder:</p>
+    <p class="path"><code>git clone https://github.com/CRKL-SDSU/CRKL.git</code><br><code>cd CRKL</code></p>
+    <p>Or, on <a href="https://github.com/CRKL-SDSU/CRKL">GitHub</a>, click <strong>Code → Download ZIP</strong>, unzip it, and open the folder in a terminal.</p>
+
+    <h3 id="run-configure">2. Configure</h3>
+
+    <h4 id="run-env">The <code>.env</code> file</h4>
+    <p>The only file you need to create is <code>.env</code>, which holds the two database passwords. Copy the example in the <code>CRKL</code> folder:</p>
+    <p class="path"><code>cp .env.example .env</code></p>
+    <p>On Windows (Command Prompt), use <code>copy .env.example .env</code>. Then open <code>.env</code> in a text editor and replace both placeholder values (<code>change-me-root</code> and <code>change-me-app</code>) with passwords of your own choice. These are <strong>new</strong> passwords for the database Docker creates on your computer, not existing accounts, so any values work:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Setting</th><th>What it is</th><th>Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>CRKL_DB_ROOT_PASSWORD</code></td><td>Password for MySQL's <strong>root</strong> account. Used only on the first start, to create the database and the application user.</td><td><code>root-secret-123</code></td></tr>
+          <tr><td><code>CRKL_DB_USER_PASSWORD</code></td><td>Password for <strong>crkl</strong>, the account the backend uses. It can only read and write rows in <code>crkl_db</code>; it can't drop tables or change the schema.</td><td><code>app-secret-456</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li>Choose any values, but <strong>don't use single quotes</strong> (<code>'</code>) in them.</li>
+      <li>Docker refuses to start if either value is missing, so you can't accidentally run with an empty password.</li>
+      <li>The passwords are applied <strong>only on the first start</strong>. To change them later, reset the database (see <a href="#run-stop">Stop and reset</a>).</li>
+      <li><code>.env</code> is ignored by Git, so your passwords are never committed.</li>
+    </ul>
+
+    <h4 id="run-other-config">Other configuration files</h4>
+    <p>These are already set up for Docker. <strong>You don't need to edit them.</strong></p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>File</th><th>What it configures</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>docker-compose.yaml</code></td><td>The three services, the order they start in, and the one published port (3000). The backend and database are reachable only inside Docker.</td></tr>
+          <tr><td><code>backend/conf/docker.yaml</code></td><td>How the backend connects to MySQL: host <code>mysql</code>, port 3306, user <code>crkl</code>, database <code>crkl_db</code>. The password comes from <code>CRKL_DB_USER_PASSWORD</code> in <code>.env</code>.</td></tr>
+          <tr><td><code>specs/db/DDL.sql</code>, <code>specs/db/dummy_data.sql</code>, <code>docker/mysql/03-app-user.sh</code></td><td>Run by MySQL on the first start, in this order: create the tables, load the sample data, and create the <code>crkl</code> user.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="run-start">3. Start</h3>
+    <p>In the <code>CRKL</code> folder, run:</p>
+    <p class="path"><code>docker compose up --build</code></p>
+    <p>The first start takes a few minutes. Docker downloads the images, builds the backend and frontend, and MySQL creates the database and loads the sample data. Each service waits until the one before it is healthy:</p>
+    <ol>
+      <li><strong>mysql</strong> starts and finishes loading the data.</li>
+      <li><strong>backend</strong> starts once it can log in to MySQL as <code>crkl</code>.</li>
+      <li><strong>frontend</strong> starts once the backend reports the database as connected.</li>
+    </ol>
+    <p>Leave this terminal open; the logs of all three services appear in it. Later starts are much faster, because the images and data are kept.</p>
+
+    <h3 id="run-check">4. Check that it works</h3>
+    <ol>
+      <li>Open <a href="http://localhost:3000/explore">http://localhost:3000/explore</a>.</li>
+      <li>With <strong>Missions</strong> selected and <strong>Include related records</strong> checked, search for <code>NASA</code>.</li>
+      <li>You should see <strong>28 results</strong>. Uncheck <strong>Include related records</strong> and search again: <strong>0 results</strong>, because no mission mentions NASA in its own fields.</li>
+    </ol>
+    <p>See the <a href="instructions.html">Instructions</a> for everything else you can do on the Explore page.</p>
+
+    <h3 id="run-stop">5. Stop and reset</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>To…</th><th>Run</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Stop the services (data is kept)</td><td>Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in the terminal, then <code>docker compose down</code></td></tr>
+          <tr><td>Start again</td><td><code>docker compose up</code></td></tr>
+          <tr><td>Reset the database to the sample data (also applies new passwords from <code>.env</code>)</td><td><code>docker compose down -v</code>, then <code>docker compose up</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="run-trouble">Troubleshooting</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Problem</th><th>What to do</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>Cannot connect to the Docker daemon</code></td><td>Docker Desktop isn't running. Start it, wait until it says it's running, and try again.</td></tr>
+          <tr><td><code>set CRKL_DB_ROOT_PASSWORD in .env</code> (or <code>…USER_PASSWORD…</code>)</td><td>The <code>.env</code> file is missing or a value is empty. Repeat <a href="#run-env">step 2</a> in the <code>CRKL</code> folder.</td></tr>
+          <tr><td><code>port is already allocated</code> for 3000</td><td>Another program is using port 3000. Stop it, then run <code>docker compose up</code> again.</td></tr>
+          <tr><td>The backend never becomes healthy after you changed the passwords</td><td>The database still has the old passwords from its first start. Run <code>docker compose down -v</code>, then <code>docker compose up</code>.</td></tr>
+          <tr><td>The page shows <code>API returned 502</code> or <code>503</code></td><td>The backend or database isn't ready yet, or has stopped. Check the terminal logs, wait a moment, and reload.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 id="run-without-docker">Running without Docker</h3>
+    <p>For development, you can also run each service directly with Homebrew MySQL 8.0, Python 3.12, and Node.js 20. See <a href="https://github.com/CRKL-SDSU/CRKL#b-local-without-docker">“B. Local (without Docker)”</a> in the README.</p>
+
+    <h2 id="original">Original work beyond AI assistance</h2>
+    <p>We used AI coding assistants during development, as allowed by the CS 514 AI policy. This is the work our team did ourselves.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Member</th><th>Original work</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Christopher</td><td>API research: evaluating space-data APIs such as Launch Library 2, the data they return, and their formats, for importing real data</td></tr>
+          <tr><td>Kazuhiro</td><td>Data model, API endpoints, and SQL: the mission-centric schema with junction tables, the search and related-record SQL (<code>EXISTS</code> subqueries over the junction tables), the <strong>Include related records</strong> option, and the attributes shown on search result cards</td></tr>
+          <tr><td>Lia</td><td>Project structure, the first frontend pages (now in <code>legacy/vite-frontend</code>), and the project website (About, Team, and styles)</td></tr>
+          <tr><td>Ryan</td><td>Backend server skeleton (<code>backend/code/main.py</code>, <code>db_management.py</code>), the first database schema, and the code comments in the backend</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Design decisions made by the team:</strong> basing the data model on Launch Library 2; reducing the original design to four core entities (agencies, missions, launches, spacecraft) connected through junction tables; keeping the backend and database private behind a Next.js proxy; and running search in MySQL instead of in the browser.</p>
+
+    <h2 id="ai">AI usage</h2>
+    <h3 id="ai-how-we-used-ai">How we used AI</h3>
+    <p>We used AI coding assistants openly throughout development, as allowed by the CS 514 AI policy: GitHub Copilot and Claude Code. Most of the AI-assisted work was in the implementation: the basic API endpoints, the Next.js proxy, tests, the CI/CD pipeline, the Docker setup, and documentation. Some parts were written by hand: Ryan wrote the backend skeleton, Lia built the website and our first screens, and Kazuhiro extended the API endpoints and wrote the SQL and features such as the Include related records option and the attributes shown on search result cards.</p>
+    <h3 id="ai-how-much">How much</h3>
+    <p>We didn't measure an exact percentage. Roughly, AI assisted with large parts of the implementation, while the data model, the API design, and the architecture were our own decisions.</p>
+    <h3 id="ai-what-the-team-decided-and-what-ai-did">What the team decided, and what AI did</h3>
+    <p>We decided the <em>what</em> and the <em>why</em>; AI mostly helped with the <em>how</em>. Our decisions included:</p>
+    <ul>
+      <li>basing our data model on Launch Library 2;</li>
+      <li>cutting the original design down to four core entities connected through junction tables;</li>
+      <li>keeping the backend and database private behind a Next.js proxy; and</li>
+      <li>running search in MySQL so related records can be matched with joins.</li>
+    </ul>
+    <p>AI did not design our database. We studied the Launch Library 2 API, chose which entities to keep, and decided to model the relationships as many-to-many with junction tables. AI helped us write it up (the DDL, the ER diagram, the documentation), but every table and key is something we can explain and defend.</p>
+    <h3 id="ai-how-we-worked-with-ai">How we worked with AI</h3>
+    <p>We worked spec-first. We wrote the OpenAPI specification and the database schema first, gave them to the AI as context, and asked it how to implement one small feature at a time.</p>
+    <h3 id="ai-how-we-checked-ai-output">How we checked AI output</h3>
+    <ol>
+      <li><strong>A written spec:</strong> the code has to match the OpenAPI specification and the DDL.</li>
+      <li><strong>Automated tests:</strong> backend and frontend tests, a type check, and a production build run in GitHub Actions on every push.</li>
+      <li><strong>Pull requests:</strong> code changes are reviewed in a pull request before they are merged.</li>
+      <li><strong>The real database:</strong> we ran queries against MySQL and checked with <code>EXPLAIN</code> that related search uses the junction tables' composite primary keys.</li>
+    </ol>
+    <h3 id="ai-how-we-modified-and-extended-ai-output">How we modified and extended AI output</h3>
+    <ul>
+      <li>We reviewed and corrected AI-written documentation for accuracy and clarity.</li>
+      <li>We made the design decisions ourselves and replaced AI suggestions that didn't fit our constraints (for example, how we keep source IDs unique across data sources).</li>
+      <li>We replaced or extended AI-generated code with our own features or endpoints (for example, related-record search over the junction tables).</li>
+      <li>We scoped AI drafts down to a design we could build, normalize, and explain (for example, reducing an oversized schema to four core entities).</li>
+    </ul>
+    <h3 id="ai-about-ai-co-authors-in-our-git-history">About AI co-authors in our Git history</h3>
+    <p>Git operations (commits, branches, pushes, pull requests) were run through AI tools as a matter of habit, including for changes written by hand. A <code>Co-authored-by</code> trailer shows that a commit was made through an AI tool, not that the AI wrote its content.</p>
+    <h3 id="ai-the-demo-video-and-sample-data">The demo video and sample data</h3>
+    <ul>
+      <li><strong>Demo video:</strong> we automated the screen recording with a short Puppeteer script, written with Claude Code. The app and the results in the video are real: it is a recording of CRKL-Space running locally against MySQL, not edited or sped up. The cursor and click highlights were added by the script for visibility.</li>
+      <li><strong>Sample data:</strong> the Phase 1 records are sample data in the Launch Library 2 format (for example, "Lunar South Pole Habitation Scout" is not a real mission). We generated them with AI to get a realistic volume quickly.</li>
+    </ul>
+    <h3 id="ai-what-we-learned">What we learned</h3>
+    <p>AI is fast, but only as good as the spec you give it. When our requirements were vague, it produced code that looked right but didn't fit. Writing the OpenAPI specification and the DDL first made its output much more reliable. We still read and understand every line, because we are responsible for it.</p>
+  </main>
+</div>
+</div>
+</body>
+</html>
