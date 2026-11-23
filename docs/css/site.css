@@ -1,9 +1,9 @@
 /* Ported from legacy/vite-frontend/src/index.css (Lia Chavez), unchanged. */
 
 :root {
-  --text: #68686c;
+  --text: #abd2fa;
   --text-h: hsl(0, 0%, 97%);
-  --bg: #ffffff;
+  --bg: #16171d;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #f6964d;
@@ -38,9 +38,9 @@
     --text-h: #f3f4f6;
     --bg: #16171d;
     --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
+    --code-bg: #d8daec;
+    --accent: #abd2fa;
+    --accent-bg: rgba(199, 191, 208, 0.15);
     --accent-border: rgba(192, 132, 252, 0.5);
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow:
@@ -51,6 +51,35 @@
     filter: invert(1) brightness(2);
   }
 }
+
+/* Navigation */
+.nav ul {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-right: 20px;
+}
+
+.nav a {
+    font-size: 0.95rem;
+    font-weight: 400;
+    text-decoration: none;
+    color: #abd2fa;
+    transition: color 0.3s ease;
+    margin-bottom: 20px;
+    
+}
+
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #000000;
+}
+
 
 body {
   margin: 0;
@@ -76,12 +105,12 @@ h1{
 h2 {
   font-family: var(--heading);
   font-weight: 500;
-  color: #3f230a;
+  color: #d58c3f;
 }
 h3{
   font-family: var(--heading);
   font-weight: 500;
-  color: #3f230a;
+  color: #d58c3f;
 }
 h1 {
   font-size: 56px;
@@ -124,7 +153,9 @@ code {
 .hero {
   text-align: center;
   margin-bottom: 90px;
-  background-image: url('../pexels-zelch-12498782.jpg');
+  margin-top: 0px;
+  background-image: url('../nasa-gYwfpVI2JzM-unsplash.jpg');
+
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -132,11 +163,13 @@ code {
   P{font-style: italic;}
   min-height: 600px;
   color: rgb(255, 255, 255);
-
+ 
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  P2{font-style: italic; }
+  
 }
 
 .mission-statment {
@@ -145,7 +178,7 @@ code {
   margin-bottom: 90px;
   margin-left: 50px;
   margin-right: 50px;
-  p{color: #000;}
+  p{color: #ffffff;}
  
 }
 .mission{
@@ -155,7 +188,9 @@ code {
   margin-right: 50px;
   display: grid;
   gap:20px;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
+
+
 }
 .mission-cards{
  background-color: hsl(0, 0%, 100%);
@@ -164,7 +199,10 @@ code {
   color: #000000;
   justify-content: left;
 }
-
+.team-link{
+  padding-top: 50px;
+  a{color: #abd2fa;}
+}
 .blogs{
  margin-top: 50px;
   margin-bottom: 50px;
@@ -181,6 +219,8 @@ code {
   border-radius: 10px;
   color: #000000;
   justify-content: left;
+ p1{color: #68686c; }
+ text-align: left;
 }
 
 .links {
@@ -188,6 +228,7 @@ display: grid;
 gap:20px;
 justify-content: left;
 grid-template-columns: repeat(3, 1fr);
+
 }
 
 .links-card {
@@ -195,6 +236,9 @@ grid-template-columns: repeat(3, 1fr);
   padding: 30px;
   border-radius: 10px;
   color: #3f230a;
+  a{text-decoration: none;
+    color: inherit;}
+  
 }
 
 .missions {
@@ -312,7 +356,7 @@ background-color: #1c1d1f;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #3f230a;
+  color: #d58c3f;
 }
 .doc-page nav.toc ul { list-style: none; margin: 0; padding: 0; }
 .doc-page nav.toc li { margin: 6px 0; }
