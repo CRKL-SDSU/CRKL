@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .line { stroke: #131a26; }
+    .tick { stroke: #5a6577; }
+    .dot { fill: #a8541a; }
+    @media (prefers-color-scheme: dark) {
+      .line { stroke: #eef2f8; }
+      .tick { stroke: #8793a8; }
+      .dot { fill: #f1a35b; }
+    }
+  </style>
+  <path class="line" d="M24 7.5H11l-5 5v7l5 5h13" fill="none" stroke-width="3.4"/>
+  <rect class="dot" x="21" y="13" width="6" height="6"/>
+  <path class="tick" d="M0.5 16h3.5M28 16h3.5M16 0.5v3.5M16 28v3.5" stroke-width="1.6"/>
+</svg>

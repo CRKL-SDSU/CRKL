@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
+import { BrandLogo } from "../brand";
 import { aboutUrl } from "../site";
 
 type Resource = "missions" | "agencies" | "spacecraft" | "launches";
@@ -320,8 +321,7 @@ export default function ExplorePage() {
     <main className="explore-shell">
       <header className="topbar">
         <Link className="brand" href="/">
-          <span className="brand-mark">C</span>
-          <span>CRKL</span>
+          <BrandLogo />
         </Link>
         <nav className="topnav">
           <Link href="/">API console</Link>
@@ -453,7 +453,7 @@ export default function ExplorePage() {
         )}
       </section>
       <footer>
-        CRKL · Space data for curious minds · <a href={aboutUrl}>About Us</a>
+        CRKL-Space · Space data for curious minds · <a href={aboutUrl}>About Us</a>
       </footer>
       {detail && (
         <div
