@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { BrandLogo } from "../brand";
 import { aboutUrl } from "../site";
+import { RecordImage } from "./record-image";
 
 type Resource = "missions" | "agencies" | "spacecraft" | "launches";
 type ApiRecord = Record<string, unknown>;
@@ -51,8 +52,15 @@ const relatedResourceByField: Record<string, Resource> = {
   launches: "launches"
 };
 
+const singularLabels: Record<Resource, string> = {
+  missions: "mission",
+  agencies: "agency",
+  spacecraft: "spacecraft",
+  launches: "launch"
+};
+
 function resourceLabel(resource: Resource) {
-  return resource.slice(0, -1);
+  return singularLabels[resource];
 }
 
 function tagsOf(record: ApiRecord): TagRecord[] {
@@ -407,7 +415,10 @@ export default function ExplorePage() {
                       typeof value === "string" || typeof value === "number"
                   );
                   const details = Object.entries(record)
-                    .filter(([key, value]) => key !== "name" && key !== "title" && typeof value !== "object")
+                    .filter(
+                      ([key, value]) =>
+                        key !== "name" && key !== "title" && key !== "image_url" && typeof value !== "object"
+                    )
                     .slice(0, 3);
                   const tags = tagsOf(record);
                   return (
@@ -417,8 +428,9 @@ export default function ExplorePage() {
                         onClick={() => identifier && openDetail(resource, identifier)}
                         type="button"
                       >
+                        <RecordImage record={record} resource={resource} variant="card" />
                         <div className="result-card-top">
-                          <span className="result-type">{resource.slice(0, -1)}</span>
+                          <span className="result-type">{resourceLabel(resource)}</span>
                           {identifier && <span className="result-id">#{String(identifier)}</span>}
                         </div>
                         <h3>{titleFor(record)}</h3>
@@ -507,6 +519,7 @@ export default function ExplorePage() {
             {detail.error && <div className="error-message">{detail.error}</div>}
             {detail.record && !detail.loading && (
               <>
+                <RecordImage record={detail.record} resource={detail.resource} variant="detail" />
                 <div className="detail-fields">
                   {Object.entries(detail.record)
                     .filter(([, value]) => value === null || typeof value !== "object")
