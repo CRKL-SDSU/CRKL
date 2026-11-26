@@ -360,7 +360,7 @@ export default function ExplorePage() {
               <>
                 <div className="detail-fields">
                   {Object.entries(detail.record)
-                    .filter(([, value]) => !Array.isArray(value) && typeof value !== "object")
+                    .filter(([, value]) => value === null || typeof value !== "object")
                     .map(([key, value]) => (
                       <div key={key}>
                         <b>{key.replaceAll("_", " ")}</b>

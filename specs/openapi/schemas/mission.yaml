@@ -18,6 +18,8 @@ components:
           type: string
         status:
           type: string
+          nullable: true
+          description: Launch Library 2 missions have no status, so this is usually null.
         image_url:
           type: string
           format: uri

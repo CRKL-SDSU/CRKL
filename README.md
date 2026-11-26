@@ -42,6 +42,29 @@ requests) were run through AI tools as a matter of habit, including for changes
 written by hand. A trailer shows that a commit was made through an AI tool, not
 that the AI wrote its content.
 
+## Data source and license
+
+The real data comes from the [Launch Library 2 API](https://thespacedevs.com/llapi)
+by [The Space Devs](https://thespacedevs.com/), a nonprofit that provides it
+for free. Their
+[terms of use](https://github.com/TheSpaceDevs/Tutorials/blob/main/faqs/faq_TSD.md)
+allow the data to be used and shared in projects built with it, and they
+encourage caching it instead of querying the API from every client.
+
+- **Attribution:** not required, but encouraged, so we credit The Space Devs
+  here.
+- **Included data:** the API responses we include in this repository are a
+  snapshot for loading the database without hitting the API's rate limit
+  (15 requests per hour). They are used in CRKL-Space's normalized schema and
+  search, not republished as a mirror of the API.
+- **Accuracy:** The Space Devs do not guarantee that the data is 100% accurate.
+  Historic records come partly from third-party sources such as GCAT, Gunter's
+  Space Page, and spacefacts.de.
+- **Images:** we store image URLs only; the images themselves are not copied
+  into this repository.
+- **Sample data:** the records in `specs/db/dummy_data.sql` are fictional
+  sample data in the Launch Library 2 format, kept for tests and grading.
+
 ## Start the servers
 
 There are two ways to run CRKL-Space. Both serve the app at
