@@ -17,6 +17,18 @@ components:
         image_url:
           type: string
           format: uri
+        thumbnail_url:
+          type: string
+          format: uri
+          description: A smaller version of image_url for result cards
+        image_credit:
+          type: string
+          nullable: true
+          description: Who took or owns the image
+        image_license:
+          type: string
+          nullable: true
+          description: The image's license name (often "Unknown")
         missions:
           type: array
           items:

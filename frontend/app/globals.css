@@ -150,7 +150,9 @@ footer a:hover { color: var(--accent); }
 .record-image { align-items: center; background: var(--media-bg); display: flex; justify-content: center; overflow: hidden; }
 .record-image img { display: block; height: 100%; object-fit: contain; width: 100%; }
 .record-image-card { height: 112px; margin-bottom: 16px; padding: 10px; }
-.record-image-detail { height: 240px; margin-bottom: 22px; padding: 16px; }
+.record-figure { margin: 0 0 22px; }
+.record-image-detail { height: 240px; padding: 16px; }
+.record-image-credit { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10px; margin-top: 8px; overflow-wrap: anywhere; }
 .record-image-empty { background: var(--panel-light); color: var(--orbit); }
 .record-image-empty svg { height: 44px; width: 44px; }
 .search-syntax { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10px; margin: -6px 0 16px; }

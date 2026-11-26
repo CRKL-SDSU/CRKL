@@ -21,6 +21,9 @@ CREATE TABLE agencies (
     abbrev VARCHAR(50),
     country_code VARCHAR(10),
     image_url TEXT,
+    thumbnail_url TEXT, -- small square crop of a photo; not used for logos
+    image_credit VARCHAR(255),
+    image_license VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_source (source_provider, source_id)
@@ -37,6 +40,9 @@ CREATE TABLE launches (
     net DATETIME NOT NULL,
     status VARCHAR(50) NOT NULL,
     image_url TEXT,
+    thumbnail_url TEXT, -- small square crop of a photo; not used for logos
+    image_credit VARCHAR(255),
+    image_license VARCHAR(100),
     window_start DATETIME,
     window_end DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -54,6 +60,9 @@ CREATE TABLE spacecraft (
     name VARCHAR(255) NOT NULL,
     spacecraft_type VARCHAR(100),
     image_url TEXT,
+    thumbnail_url TEXT, -- small square crop of a photo; not used for logos
+    image_credit VARCHAR(255),
+    image_license VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_source (source_provider, source_id)
@@ -71,6 +80,9 @@ CREATE TABLE missions (
     target_body VARCHAR(100),
     status VARCHAR(50), -- NULL: LL2 missions have no status of their own
     image_url TEXT,
+    thumbnail_url TEXT, -- small square crop of a photo; not used for logos
+    image_credit VARCHAR(255),
+    image_license VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_source (source_provider, source_id)
