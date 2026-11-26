@@ -68,6 +68,8 @@ encourage caching it instead of querying the API from every client.
   of photos.
 - **Sample data:** the records in `specs/db/dummy_data.sql` are fictional
   sample data in the Launch Library 2 format, kept for tests and grading.
+  Their `source_provider` is `dummy`, so the site labels them "Source: Dummy"
+  and never presents them as Launch Library 2 records.
 
 ## Search syntax and tags
 
