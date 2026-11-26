@@ -13,13 +13,14 @@ USE crkl_db;
 CREATE TABLE agencies (
     agency_id INT AUTO_INCREMENT PRIMARY KEY,
     source_provider VARCHAR(50) NOT NULL,
-    source_id VARCHAR(50) NOT NULL UNIQUE,
+    source_id VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
     abbrev VARCHAR(50),
     country_code VARCHAR(10),
     image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_source (source_provider, source_id)
 ) ENGINE=InnoDB;
 
 -- =========================================================================
@@ -28,7 +29,7 @@ CREATE TABLE agencies (
 CREATE TABLE launches (
     launch_id INT AUTO_INCREMENT PRIMARY KEY,
     source_provider VARCHAR(50) NOT NULL,
-    source_id VARCHAR(50) NOT NULL UNIQUE,
+    source_id VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
     net DATETIME NOT NULL,
     status VARCHAR(50) NOT NULL,
@@ -36,7 +37,8 @@ CREATE TABLE launches (
     window_start DATETIME,
     window_end DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_source (source_provider, source_id)
 ) ENGINE=InnoDB;
 
 -- =========================================================================
@@ -45,12 +47,13 @@ CREATE TABLE launches (
 CREATE TABLE spacecraft (
     spacecraft_id INT AUTO_INCREMENT PRIMARY KEY,
     source_provider VARCHAR(50) NOT NULL,
-    source_id VARCHAR(50) NOT NULL UNIQUE,
+    source_id VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
     spacecraft_type VARCHAR(100),
     image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_source (source_provider, source_id)
 ) ENGINE=InnoDB;
 
 -- =========================================================================
@@ -59,14 +62,15 @@ CREATE TABLE spacecraft (
 CREATE TABLE missions (
     mission_id INT AUTO_INCREMENT PRIMARY KEY,
     source_provider VARCHAR(50) NOT NULL,
-    source_id VARCHAR(50) NOT NULL UNIQUE,
+    source_id VARCHAR(50) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description TEXT,
     target_body VARCHAR(100),
-    status VARCHAR(50) NOT NULL,
+    status VARCHAR(50), -- NULL: LL2 missions have no status of their own
     image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_source (source_provider, source_id)
 ) ENGINE=InnoDB;
 
 -- =========================================================================

@@ -49,6 +49,32 @@ describe("ExplorePage", () => {
     expect(fetchMock.mock.calls[0][0]).toContain("related=false");
   });
 
+  it("shows a dash for a mission without a status", async () => {
+    vi.spyOn(global, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            count: 1,
+            results: [{ mission_id: 1, name: "Real Mission", status: null }]
+          }),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ mission_id: 1, name: "Real Mission", status: null, agencies: [] }),
+          { status: 200 }
+        )
+      );
+
+    render(<ExplorePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Missions" }));
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    fireEvent.click(await screen.findByRole("button", { name: /Real Mission/i }));
+
+    await waitFor(() => expect(screen.getByRole("dialog")).toHaveTextContent("status—"));
+  });
+
   it("opens a record overlay and navigates to a related record", async () => {
     const fetchMock = vi
       .spyOn(global, "fetch")
