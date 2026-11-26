@@ -1,0 +1,44 @@
+---
+components:
+  schemas:
+    Tag:
+      type: object
+      properties:
+        tag_id:
+          type: integer
+        name:
+          type: string
+          description: Lowercase; letters, digits, single spaces, and hyphens; 1-30 characters.
+          maxLength: 30
+
+    TagSummary:
+      allOf:
+        - $ref: '#/components/schemas/Tag'
+        - type: object
+          properties:
+            mission_count:
+              type: integer
+
+    TagListResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSummary'
+
+    MissionTagsResponse:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+
+    NewTag:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: Normalized before saving (trimmed, spaces collapsed, lowercased).

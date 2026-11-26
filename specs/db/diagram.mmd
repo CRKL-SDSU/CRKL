@@ -5,6 +5,9 @@ erDiagram
     missions ||--o{ mission_launches : "involves_launches"
     spacecraft ||--o{ mission_spacecraft : "used_in"
     missions ||--o{ mission_spacecraft : "utilizes_spacecraft"
+    missions ||--o{ mission_tags : "labeled_with"
+    tags ||--o{ mission_tags : "applied_to"
+    users |o--o{ mission_tags : "created_by"
 
     agencies {
         int agency_id PK "Surrogate key"
@@ -64,3 +67,22 @@ erDiagram
         int spacecraft_id PK, FK
     }
     
+
+    tags {
+        int tag_id PK "Surrogate key"
+        string name UK "Normalized: lowercase"
+    }
+
+    mission_tags {
+        int mission_id PK, FK
+        int tag_id PK, FK
+        int created_by FK "NULL = anonymous"
+        datetime created_at
+    }
+
+    users {
+        int user_id PK "Reserved for authentication"
+        string auth_provider
+        string auth_subject
+        string display_name
+    }

@@ -49,6 +49,87 @@ describe("ExplorePage", () => {
     expect(fetchMock.mock.calls[0][0]).toContain("related=false");
   });
 
+  it("searches by tag when a tag on a result card is clicked", async () => {
+    const fetchMock = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            count: 1,
+            results: [
+              { mission_id: 1, name: "Lunar Scout", tags: [{ tag_id: 4, name: "ocean worlds" }] }
+            ]
+          }),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ count: 0, results: [] }), { status: 200 })
+      );
+
+    render(<ExplorePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    fireEvent.click(await screen.findByRole("button", { name: "#ocean worlds" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const url = new URL(String(fetchMock.mock.calls[1][0]), "http://localhost");
+    expect(url.pathname).toBe("/api/v1/missions");
+    expect(url.searchParams.get("search")).toBe('tag:"ocean worlds"');
+    expect(screen.getByRole("searchbox")).toHaveValue('tag:"ocean worlds"');
+  });
+
+  it("shows the API's message for a malformed query", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ detail: "A parenthesis is missing a closing ')'." }), {
+        status: 400
+      })
+    );
+
+    render(<ExplorePage />);
+    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "(mars" } });
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+
+    expect(await screen.findByText("A parenthesis is missing a closing ')'.")).toBeInTheDocument();
+  });
+
+  it("adds a tag from the mission detail view", async () => {
+    const fetchMock = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ count: 1, results: [{ mission_id: 1, name: "Lunar Scout", tags: [] }] }),
+          { status: 200 }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ mission_id: 1, name: "Lunar Scout", tags: [] }), {
+          status: 200
+        })
+      )
+      .mockResolvedValue(
+        new Response(JSON.stringify({ tags: [{ tag_id: 9, name: "moon" }], results: [] }), {
+          status: 201
+        })
+      );
+
+    render(<ExplorePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    fireEvent.click(await screen.findByRole("button", { name: /Lunar Scout/i }));
+    await waitFor(() => expect(screen.getByRole("dialog")).toHaveTextContent("No tags yet."));
+
+    fireEvent.change(screen.getByRole("combobox", { name: "New tag" }), {
+      target: { value: "Moon" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add tag" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("dialog")).toHaveTextContent("#moon")
+    );
+    const post = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
+    expect(String(post?.[0])).toBe("/api/v1/missions/1/tags");
+    expect(post?.[1]?.body).toBe(JSON.stringify({ name: "Moon" }));
+  });
+
   it("shows a dash for a mission without a status", async () => {
     vi.spyOn(global, "fetch")
       .mockResolvedValueOnce(
