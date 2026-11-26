@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 
+import { BrandLogo } from "./brand";
 import { aboutUrl } from "./site";
 
 type Resource = "missions" | "agencies" | "spacecraft" | "launches";
@@ -151,8 +152,7 @@ export default function Home() {
     <main className="shell">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-mark">C</span>
-          <span>CRKL</span>
+          <BrandLogo />
         </div>
         <nav className="topnav">
           <Link href="/explore">Explore data</Link>
@@ -165,7 +165,7 @@ export default function Home() {
           <p className="eyebrow">API WORKBENCH / v1.0.0</p>
           <h1>Explore the final frontier.</h1>
           <p className="hero-copy">
-            A simple request console for the CRKL space data API. Choose a
+            A simple request console for the CRKL-Space API. Choose a
             resource, send a JSON request, and inspect the response.
           </p>
         </div>
@@ -294,7 +294,7 @@ export default function Home() {
         </section>
       </div>
       <footer>
-        Built from the CRKL OpenAPI specification · JSON over REST ·{" "}
+        Built from the CRKL-Space OpenAPI specification · JSON over REST ·{" "}
         <a href={aboutUrl}>About Us</a>
       </footer>
     </main>

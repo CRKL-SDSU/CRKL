@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CRKL API Console",
-  description: "A small frontend for testing the CRKL Space Exploration API"
+  title: { default: "API Console · CRKL-Space", template: "%s · CRKL-Space" },
+  description: "Search and explore space missions, agencies, spacecraft, and launches"
 };
 
 export default function RootLayout({
