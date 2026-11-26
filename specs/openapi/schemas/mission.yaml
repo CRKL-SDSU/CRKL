@@ -35,6 +35,10 @@ components:
           type: array
           items:
             type: object
+        tags:
+          type: array
+          items:
+            $ref: './tag.yaml#/components/schemas/Tag'
         created_at:
           type: string
           format: date-time

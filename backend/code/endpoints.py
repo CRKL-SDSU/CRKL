@@ -1,12 +1,16 @@
 # Purpose: endpoints.py contains the API endpoints for the backend, which are used by the frontend to access the database
 
+import json
 from typing import Any
 
 import pymysql
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Body, HTTPException, Query, Request
 
 # importing our fetch commands from db_management.py, which will be used to query our database
-from db_management import fetch_all, fetch_one
+from db_management import database_connection, fetch_all, fetch_one
+
+# importing the Gmail-style search query parser
+from search_query import And, Node, Not, Or, QueryError, Tag, Text, normalize_tag, parse_query
 
 # configuring our API router, which will be used to define the endpoints for our web server
 router = APIRouter(prefix="/api/v1")
@@ -100,6 +104,56 @@ RELATED_SEARCH = {
     ),
 }
 
+# defining how a tag:name term matches each resource
+# tags belong to missions, so the other resources match through the mission junction tables
+TAG_SEARCH = {
+    "missions": """EXISTS (
+            SELECT 1
+            FROM mission_tags mt
+            JOIN tags t ON t.tag_id = mt.tag_id
+            WHERE mt.mission_id = missions.mission_id AND t.name = %s
+        )""",
+    "agencies": """EXISTS (
+            SELECT 1
+            FROM mission_agencies ma
+            JOIN mission_tags mt ON mt.mission_id = ma.mission_id
+            JOIN tags t ON t.tag_id = mt.tag_id
+            WHERE ma.agency_id = agencies.agency_id AND t.name = %s
+        )""",
+    "spacecraft": """EXISTS (
+            SELECT 1
+            FROM mission_spacecraft ms
+            JOIN mission_tags mt ON mt.mission_id = ms.mission_id
+            JOIN tags t ON t.tag_id = mt.tag_id
+            WHERE ms.spacecraft_id = spacecraft.spacecraft_id AND t.name = %s
+        )""",
+    "launches": """EXISTS (
+            SELECT 1
+            FROM mission_launches ml
+            JOIN mission_tags mt ON mt.mission_id = ml.mission_id
+            JOIN tags t ON t.tag_id = mt.tag_id
+            WHERE ml.launch_id = launches.launch_id AND t.name = %s
+        )""",
+}
+
+# the tags of each mission, returned as a JSON array alongside the mission's columns
+MISSION_TAGS_COLUMN = """(
+            SELECT JSON_ARRAYAGG(JSON_OBJECT('tag_id', t.tag_id, 'name', t.name))
+            FROM mission_tags mt
+            JOIN tags t ON t.tag_id = mt.tag_id
+            WHERE mt.mission_id = missions.mission_id
+        ) AS tags"""
+
+# the maximum number of tags a single mission can have
+MAX_TAGS_PER_MISSION = 10
+
+# the tags of one mission, sorted by name
+MISSION_TAGS_QUERY = """SELECT t.tag_id, t.name
+                   FROM tags t
+                   JOIN mission_tags mt ON mt.tag_id = t.tag_id
+                   WHERE mt.mission_id = %s
+                   ORDER BY t.name"""
+
 # defining a database error handler that will be used to handle any databasee-releated errors that occur during API requests
 def _database_error(error: pymysql.MySQLError) -> HTTPException:
     print(f"ERROR: Database query failed: {error}")
@@ -136,6 +190,50 @@ def _pagination_links(
         )
     return next_url, previous_url
 
+# function that will build the SQL condition for one plain search term (a word or a "quoted phrase")
+def _text_condition(value: str, resource: str, related: bool) -> tuple[str, list[Any]]:
+    # escape the LIKE wildcards so they are searched for literally
+    escaped = value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    pattern = f"%{escaped}%"
+    conditions = [f"{column} LIKE %s ESCAPE '\\\\'" for column in SEARCH_COLUMNS[resource]]
+    parameters: list[Any] = [pattern for _ in SEARCH_COLUMNS[resource]]
+
+    # "if related search is on, also match the term in linked records"
+    if related:
+        conditions.append(RELATED_SEARCH[resource][0])
+        parameters.extend(pattern for _ in RELATED_SEARCH[resource][1])
+    return "(" + " OR ".join(conditions) + ")", parameters
+
+
+# function that will turn a parsed search query into a parameterized SQL condition
+def _search_condition(node: Node, resource: str, related: bool) -> tuple[str, tuple[Any, ...]]:
+    def build(current: Node) -> tuple[str, list[Any]]:
+        if isinstance(current, Text):
+            return _text_condition(current.value, resource, related)
+        if isinstance(current, Tag):
+            return TAG_SEARCH[resource], [current.name]
+        if isinstance(current, Not):
+            sql, parameters = build(current.child)
+            return f"NOT {sql}", parameters
+        joiner = " AND " if isinstance(current, And) else " OR "
+        parts = [build(child) for child in current.children]
+        return (
+            "(" + joiner.join(sql for sql, _ in parts) + ")",
+            [parameter for _, parameters in parts for parameter in parameters],
+        )
+
+    sql, parameters = build(node)
+    return sql, tuple(parameters)
+
+
+# function that will turn the JSON array of tags from MySQL into a sorted list
+def _decode_tags(value: Any) -> list[dict[str, Any]]:
+    if not value:
+        return []
+    tags = json.loads(value) if isinstance(value, (str, bytes)) else value
+    return sorted(tags, key=lambda tag: tag["name"])
+
+
 # function that will list resources (missions, agencies, spacecraft, paunches) with pagination, search, and related filtering as a dictionary. This is based on:
 # the resource type
 # the request
@@ -154,22 +252,19 @@ def _list_resource(
     where = ""
     parameters: tuple[Any, ...] = ()
 
-    # "if given a search, escape the search term to prevent SQL injection and construct the WHERE clause for the query"
-    if search:
-        escaped_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-        conditions = [
-            f"{column} LIKE %s ESCAPE '\\\\'" for column in SEARCH_COLUMNS[resource]
-        ]
-        parameters_list = [f"%{escaped_search}%" for _ in SEARCH_COLUMNS[resource]]
+    # "try to parse the search query, and reject malformed queries with a 400 error"
+    try:
+        expression = parse_query(search)
+    except QueryError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
 
-        # "if the search term is related, add the search conditions to the WHERE clause"
-        if related:
-            conditions.append(RELATED_SEARCH[resource][0])
-            parameters_list.extend(
-                f"%{escaped_search}%" for _ in RELATED_SEARCH[resource][1]
-            )
-        where = " WHERE (" + " OR ".join(conditions) + ")"
-        parameters = tuple(parameters_list)
+    # "if given a search, build the WHERE clause from the parsed query"
+    if expression is not None:
+        condition, parameters = _search_condition(expression, resource, related)
+        where = f" WHERE {condition}"
+
+    # missions also return their tags, so result cards can show them
+    columns = f"*, {MISSION_TAGS_COLUMN}" if resource == "missions" else "*"
 
     # "try to fetch the count of records and the actual records from this database and make an exception for any potential database errors"
     try:
@@ -177,11 +272,15 @@ def _list_resource(
             f"SELECT COUNT(*) AS count FROM {table}{where}", parameters
         )
         results = fetch_all(
-            f"SELECT * FROM {table}{where} ORDER BY {id_column} LIMIT %s OFFSET %s",
+            f"SELECT {columns} FROM {table}{where} ORDER BY {id_column} LIMIT %s OFFSET %s",
             parameters + (limit, offset),
         )
     except pymysql.MySQLError as error:
         raise _database_error(error) from error
+
+    if resource == "missions":
+        for record in results:
+            record["tags"] = _decode_tags(record.get("tags"))
 
     # "if a count row was returned, set the count to the value of the count column, else set it to 0"
     count = int(count_row["count"]) if count_row else 0
@@ -271,6 +370,7 @@ def get_mission(id: int) -> dict[str, Any]:
                    WHERE ml.mission_id = %s
                    ORDER BY l.launch_id""",
             ),
+            ("tags", MISSION_TAGS_QUERY),
         ],
     )
 
@@ -363,3 +463,124 @@ def get_launch(id: int) -> dict[str, Any]:
             )
         ],
     )
+
+
+# ===== TAG ENDPOINTS ===== #
+
+# API endpoint for listing tags (used for suggestions while typing a tag)
+@router.get("/tags", summary="List tags")
+def list_tags(
+    search: str = Query(default=""),
+    limit: int = Query(default=20, ge=1, le=100),
+) -> dict[str, Any]:
+    prefix = " ".join(search.split()).lower()
+    escaped = prefix.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+    # "try to fetch the tags that start with the search text, most used first"
+    try:
+        results = fetch_all(
+            """SELECT t.tag_id, t.name, COUNT(mt.mission_id) AS mission_count
+               FROM tags t
+               LEFT JOIN mission_tags mt ON mt.tag_id = t.tag_id
+               WHERE t.name LIKE %s ESCAPE '\\\\'
+               GROUP BY t.tag_id, t.name
+               ORDER BY mission_count DESC, t.name
+               LIMIT %s""",
+            (f"{escaped}%", limit),
+        )
+    except pymysql.MySQLError as error:
+        raise _database_error(error) from error
+    return {"results": results}
+
+
+# API endpoint for adding a tag to a mission; the tag is created if it doesn't exist yet
+@router.post("/missions/{id}/tags", status_code=201, summary="Add a tag to a mission")
+def add_mission_tag(id: int, name: str = Body(embed=True)) -> dict[str, Any]:
+    # "try to normalize the tag name, and reject invalid names with a 400 error"
+    try:
+        tag_name = normalize_tag(name)
+    except QueryError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+    # "try to add the tag in one transaction, and make an exception for any database errors"
+    try:
+        with database_connection() as connection:
+            try:
+                connection.begin()
+                with connection.cursor() as cursor:
+                    # lock the mission row so two requests can't both pass the tag limit check
+                    cursor.execute(
+                        "SELECT mission_id FROM missions WHERE mission_id = %s FOR UPDATE", (id,)
+                    )
+                    if cursor.fetchone() is None:
+                        raise HTTPException(status_code=404, detail="Resource not found")
+
+                    # count the mission's other tags, so re-adding a tag it already has never hits the limit
+                    cursor.execute(
+                        """SELECT COUNT(*) AS count
+                           FROM mission_tags mt
+                           JOIN tags t ON t.tag_id = mt.tag_id
+                           WHERE mt.mission_id = %s AND t.name <> %s""",
+                        (id, tag_name),
+                    )
+                    if cursor.fetchone()["count"] >= MAX_TAGS_PER_MISSION:
+                        raise HTTPException(
+                            status_code=409,
+                            detail=f"A mission can have at most {MAX_TAGS_PER_MISSION} tags.",
+                        )
+
+                    # create the tag, or reuse the existing one with the same name
+                    cursor.execute(
+                        """INSERT INTO tags (name) VALUES (%s)
+                           ON DUPLICATE KEY UPDATE tag_id = LAST_INSERT_ID(tag_id)""",
+                        (tag_name,),
+                    )
+                    tag_id = cursor.lastrowid
+
+                    # link it to the mission; adding a tag the mission already has is a no-op
+                    cursor.execute(
+                        "INSERT IGNORE INTO mission_tags (mission_id, tag_id) VALUES (%s, %s)",
+                        (id, tag_id),
+                    )
+                    cursor.execute(MISSION_TAGS_QUERY, (id,))
+                    tags = list(cursor.fetchall())
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
+    except pymysql.MySQLError as error:
+        raise _database_error(error) from error
+    return {"tags": tags}
+
+
+# API endpoint for removing a tag from a mission; a tag no mission uses anymore is deleted
+@router.delete("/missions/{id}/tags/{tag_id}", summary="Remove a tag from a mission")
+def remove_mission_tag(id: int, tag_id: int) -> dict[str, Any]:
+    # "try to remove the tag in one transaction, and make an exception for any database errors"
+    try:
+        with database_connection() as connection:
+            try:
+                connection.begin()
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM mission_tags WHERE mission_id = %s AND tag_id = %s",
+                        (id, tag_id),
+                    )
+                    if cursor.rowcount == 0:
+                        raise HTTPException(status_code=404, detail="Resource not found")
+
+                    cursor.execute(
+                        """DELETE FROM tags
+                           WHERE tag_id = %s
+                             AND NOT EXISTS (SELECT 1 FROM mission_tags WHERE tag_id = %s)""",
+                        (tag_id, tag_id),
+                    )
+                    cursor.execute(MISSION_TAGS_QUERY, (id,))
+                    tags = list(cursor.fetchall())
+                connection.commit()
+            except Exception:
+                connection.rollback()
+                raise
+    except pymysql.MySQLError as error:
+        raise _database_error(error) from error
+    return {"tags": tags}

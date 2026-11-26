@@ -105,8 +105,24 @@ footer a:hover { color: var(--accent); }
 .empty-search h2 { color: var(--text); font-size: 22px; margin: 14px 0 8px; }
 .empty-search p { font-size: 13px; }
 .result-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
-.result-card { background: var(--panel); border: 1px solid var(--line); color: var(--text); min-height: 190px; padding: 20px; text-align: left; width: 100%; }
+.result-card { background: var(--panel); border: 1px solid var(--line); color: var(--text); display: flex; flex-direction: column; min-height: 190px; }
 .result-card:hover { border-color: var(--accent); }
+.result-card-main { background: transparent; border: 0; color: inherit; flex: 1; padding: 20px; text-align: left; width: 100%; }
+.result-card > .tag-list { padding: 0 20px 18px; }
+.search-syntax { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10px; margin: -6px 0 16px; }
+.search-syntax code { color: var(--text); }
+.tag-list { align-items: center; display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-chip { background: transparent; border: 1px solid var(--line); border-radius: 999px; color: var(--accent); font-family: "DM Mono", monospace; font-size: 10px; max-width: 100%; overflow: hidden; padding: 4px 9px; text-overflow: ellipsis; white-space: nowrap; }
+.tag-chip:hover { border-color: var(--accent); }
+.tag-more, .tag-empty { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10px; }
+.tag-chip-group { display: inline-flex; }
+.tag-chip-group .tag-chip { border-radius: 999px 0 0 999px; border-right: 0; }
+.tag-remove { background: transparent; border: 1px solid var(--line); border-radius: 0 999px 999px 0; color: var(--muted); font-size: 12px; line-height: 1; padding: 0 8px 0 6px; }
+.tag-remove:hover { border-color: var(--red); color: var(--red); }
+.tag-form { display: flex; gap: 8px; margin-top: 14px; }
+.tag-form input { background: var(--panel-light); border: 1px solid var(--line); color: var(--text); flex: 1; font-size: 12px; min-width: 0; padding: 9px 11px; }
+.tag-form button { background: var(--accent); border: 0; color: #1a130e; font-size: 12px; font-weight: 600; padding: 0 16px; }
+.tag-form button:disabled { cursor: not-allowed; opacity: .45; }
 .result-card-top { display: flex; justify-content: space-between; }
 .result-type, .result-id { color: var(--accent); font-family: "DM Mono", monospace; font-size: 10px; text-transform: uppercase; }
 .result-id { color: var(--muted); }

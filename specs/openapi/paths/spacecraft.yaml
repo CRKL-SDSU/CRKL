@@ -16,6 +16,11 @@ paths:
             default: 0
         - name: search
           in: query
+          description: >-
+            Gmail-style query. Words are combined with AND; `OR` (uppercase) matches either side;
+            `-term` excludes; `"a phrase"` matches exactly; `tag:moon` or `tag:"ocean worlds"` matches
+            mission tags (other resources match through their missions); parentheses group terms.
+            Malformed queries return 400.
           schema:
             type: string
             default: ''
@@ -26,6 +31,8 @@ paths:
             application/json:
               schema:
                 $ref: '../schemas/spacecraft.yaml#/components/schemas/SpacecraftListResponse'
+        '400':
+          description: The search query is malformed
 
   spacecraft_item:
     get:

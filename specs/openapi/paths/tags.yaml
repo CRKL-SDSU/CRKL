@@ -1,0 +1,82 @@
+---
+paths:
+  tags_collection:
+    get:
+      summary: List tags
+      description: Tags whose names start with `search`, most used first. Used for suggestions while typing.
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+            default: ''
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/tag.yaml#/components/schemas/TagListResponse'
+
+  mission_tags:
+    post:
+      summary: Add a tag to a mission
+      description: >-
+        Creates the tag if it doesn't exist and links it to the mission. Adding a tag the mission
+        already has changes nothing. Tags are anonymous for now (`mission_tags.created_by` is NULL).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tag.yaml#/components/schemas/NewTag'
+      responses:
+        '201':
+          description: The mission's tags after the change
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/tag.yaml#/components/schemas/MissionTagsResponse'
+        '400':
+          description: Invalid tag name
+        '404':
+          description: Mission not found
+        '409':
+          description: The mission already has the maximum of 10 tags
+
+  mission_tag_item:
+    delete:
+      summary: Remove a tag from a mission
+      description: A tag that no mission uses anymore is deleted.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: tag_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The mission's tags after the change
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/tag.yaml#/components/schemas/MissionTagsResponse'
+        '404':
+          description: The mission doesn't have this tag

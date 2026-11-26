@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import { aboutUrl } from "../site";
 
@@ -15,6 +15,7 @@ type DetailState = {
   error: string;
 };
 type DetailTarget = Pick<DetailState, "resource" | "id">;
+type TagRecord = { tag_id: number; name: string };
 
 const resources: { value: Resource; label: string }[] = [
   { value: "missions", label: "Missions" },
@@ -53,6 +54,33 @@ function resourceLabel(resource: Resource) {
   return resource.slice(0, -1);
 }
 
+function tagsOf(record: ApiRecord): TagRecord[] {
+  return Array.isArray(record.tags)
+    ? record.tags.filter(
+        (tag): tag is TagRecord =>
+          typeof tag === "object" && tag !== null && "tag_id" in tag && "name" in tag
+      )
+    : [];
+}
+
+// tag:moon, or tag:"ocean worlds" for a multi-word tag
+function tagQuery(name: string) {
+  return name.includes(" ") ? `tag:"${name}"` : `tag:${name}`;
+}
+
+async function errorMessage(response: Response) {
+  try {
+    const body: unknown = await response.json();
+    if (typeof body === "object" && body !== null) {
+      const detail = (body as { detail?: unknown }).detail;
+      if (typeof detail === "string") return detail;
+    }
+  } catch {
+    // fall through to the status text
+  }
+  return `API returned ${response.status} ${response.statusText}`;
+}
+
 export default function ExplorePage() {
   const [query, setQuery] = useState("");
   const [resource, setResource] = useState<Resource>("missions");
@@ -65,11 +93,11 @@ export default function ExplorePage() {
   const [detail, setDetail] = useState<DetailState | null>(null);
   const [detailHistory, setDetailHistory] = useState<DetailTarget[]>([]);
   const [detailHistoryIndex, setDetailHistoryIndex] = useState(-1);
-
-  const endpoint = useMemo(
-    () => `${apiBaseUrl.replace(/\/$/, "")}/${resource}`,
-    [resource]
-  );
+  const [searchedQuery, setSearchedQuery] = useState("");
+  const [tagInput, setTagInput] = useState("");
+  const [tagSuggestions, setTagSuggestions] = useState<TagRecord[]>([]);
+  const [tagError, setTagError] = useState("");
+  const [tagSaving, setTagSaving] = useState(false);
 
   async function loadDetail(target: DetailTarget) {
     setDetail({ ...target, record: null, loading: true, error: "" });
@@ -123,6 +151,8 @@ export default function ExplorePage() {
     setDetail(null);
     setDetailHistory([]);
     setDetailHistoryIndex(-1);
+    setTagInput("");
+    setTagError("");
   }
 
   useEffect(() => {
@@ -133,23 +163,24 @@ export default function ExplorePage() {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, []);
 
-  async function search(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function runSearch(searchQuery: string, searchResource: Resource) {
     setSearched(true);
     setLoading(true);
     setError("");
+    setSearchedQuery(searchQuery.trim());
 
     try {
       const params = new URLSearchParams({ limit: "100", offset: "0" });
-      if (query.trim()) params.set("search", query.trim());
+      if (searchQuery.trim()) params.set("search", searchQuery.trim());
       params.set("related", String(includeRelated));
-      const response = await fetch(`${endpoint}?${params.toString()}`, {
-        headers: { Accept: "application/json" }
-      });
-      const body: unknown = await response.json();
+      const response = await fetch(
+        `${apiBaseUrl.replace(/\/$/, "")}/${searchResource}?${params.toString()}`,
+        { headers: { Accept: "application/json" } }
+      );
       if (!response.ok) {
-        throw new Error(`API returned ${response.status} ${response.statusText}`);
+        throw new Error(await errorMessage(response));
       }
+      const body: unknown = await response.json();
 
       const records =
         typeof body === "object" &&
@@ -181,6 +212,102 @@ export default function ExplorePage() {
     }
   }
 
+  function search(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void runSearch(query, resource);
+  }
+
+  // clicking a tag searches missions with that tag
+  function searchTag(name: string) {
+    const nextQuery = tagQuery(name);
+    closeDetail();
+    setQuery(nextQuery);
+    setResource("missions");
+    void runSearch(nextQuery, "missions");
+  }
+
+  function updateDetailTags(tags: TagRecord[]) {
+    const missionId = detail?.record?.mission_id;
+    setDetail((current) =>
+      current?.record ? { ...current, record: { ...current.record, tags } } : current
+    );
+    setResults((current) =>
+      current.map((record) =>
+        missionId !== undefined && record.mission_id === missionId ? { ...record, tags } : record
+      )
+    );
+  }
+
+  async function addTag(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!detail?.record || !tagInput.trim()) return;
+    setTagSaving(true);
+    setTagError("");
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/missions/${encodeURIComponent(String(detail.id))}/tags`,
+        {
+          method: "POST",
+          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          body: JSON.stringify({ name: tagInput })
+        }
+      );
+      if (!response.ok) throw new Error(await errorMessage(response));
+      const body = (await response.json()) as { tags: TagRecord[] };
+      updateDetailTags(body.tags);
+      setTagInput("");
+    } catch (requestError) {
+      setTagError(requestError instanceof Error ? requestError.message : "Unable to add the tag.");
+    } finally {
+      setTagSaving(false);
+    }
+  }
+
+  async function removeTag(tag: TagRecord) {
+    if (!detail?.record) return;
+    setTagError("");
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/missions/${encodeURIComponent(String(detail.id))}/tags/${tag.tag_id}`,
+        { method: "DELETE", headers: { Accept: "application/json" } }
+      );
+      if (!response.ok) throw new Error(await errorMessage(response));
+      const body = (await response.json()) as { tags: TagRecord[] };
+      updateDetailTags(body.tags);
+    } catch (requestError) {
+      setTagError(
+        requestError instanceof Error ? requestError.message : "Unable to remove the tag."
+      );
+    }
+  }
+
+  // suggest existing tags while typing, so people reuse them instead of creating variants
+  useEffect(() => {
+    if (!tagInput.trim()) {
+      setTagSuggestions([]);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ search: tagInput.trim(), limit: "8" });
+        const response = await fetch(`${apiBaseUrl}/tags?${params.toString()}`, {
+          headers: { Accept: "application/json" },
+          signal: controller.signal
+        });
+        if (!response.ok) return;
+        const body = (await response.json()) as { results?: TagRecord[] };
+        setTagSuggestions(Array.isArray(body.results) ? body.results : []);
+      } catch {
+        // suggestions are optional
+      }
+    }, 200);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [tagInput]);
+
   function changeResource(value: Resource) {
     setResource(value);
     setResults([]);
@@ -211,7 +338,7 @@ export default function ExplorePage() {
           <input
             aria-label="Search the space catalog"
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search the space catalog..."
+            placeholder="Search the space catalog... e.g. tag:moon OR mars"
             type="search"
             value={query}
           />
@@ -219,6 +346,10 @@ export default function ExplorePage() {
             {loading ? "Searching..." : "Search"}
           </button>
         </form>
+        <p className="search-syntax">
+          <code>tag:moon</code> tag · <code>mars OR venus</code> either · <code>-radar</code> exclude ·{" "}
+          <code>&quot;south pole&quot;</code> phrase · <code>( )</code> group
+        </p>
         <div className="search-filters" role="group" aria-label="Search resource">
           <span>Search in</span>
           {resources.map((item) => (
@@ -257,7 +388,7 @@ export default function ExplorePage() {
             <div className="results-heading">
               <div>
                 <p className="eyebrow">SEARCH RESULTS</p>
-                <h2>{results.length} results for {query.trim() ? `"${query.trim()}"` : "all records"}</h2>
+                <h2>{results.length} results for {searchedQuery ? `“${searchedQuery}”` : "all records"}</h2>
               </div>
               <span>{total ?? results.length} records in catalog</span>
             </div>
@@ -278,24 +409,42 @@ export default function ExplorePage() {
                   const details = Object.entries(record)
                     .filter(([key, value]) => key !== "name" && key !== "title" && typeof value !== "object")
                     .slice(0, 3);
+                  const tags = tagsOf(record);
                   return (
-                    <button
-                      className="result-card"
-                      key={`${String(identifier || "record")}-${index}`}
-                      onClick={() => identifier && openDetail(resource, identifier)}
-                      type="button"
-                    >
-                      <div className="result-card-top">
-                        <span className="result-type">{resource.slice(0, -1)}</span>
-                        {identifier && <span className="result-id">#{String(identifier)}</span>}
-                      </div>
-                      <h3>{titleFor(record)}</h3>
-                      <div className="result-details">
-                        {details.map(([key, value]) => (
-                          <span key={key}><b>{key.replaceAll("_", " ")}</b>{displayValue(value)}</span>
-                        ))}
-                      </div>
-                    </button>
+                    <article className="result-card" key={`${String(identifier || "record")}-${index}`}>
+                      <button
+                        className="result-card-main"
+                        onClick={() => identifier && openDetail(resource, identifier)}
+                        type="button"
+                      >
+                        <div className="result-card-top">
+                          <span className="result-type">{resource.slice(0, -1)}</span>
+                          {identifier && <span className="result-id">#{String(identifier)}</span>}
+                        </div>
+                        <h3>{titleFor(record)}</h3>
+                        <div className="result-details">
+                          {details.map(([key, value]) => (
+                            <span key={key}><b>{key.replaceAll("_", " ")}</b>{displayValue(value)}</span>
+                          ))}
+                        </div>
+                      </button>
+                      {tags.length > 0 && (
+                        <div className="tag-list" aria-label="Tags">
+                          {tags.slice(0, 4).map((tag) => (
+                            <button
+                              className="tag-chip"
+                              key={tag.tag_id}
+                              onClick={() => searchTag(tag.name)}
+                              title={`Search ${tagQuery(tag.name)}`}
+                              type="button"
+                            >
+                              #{tag.name}
+                            </button>
+                          ))}
+                          {tags.length > 4 && <span className="tag-more">+{tags.length - 4}</span>}
+                        </div>
+                      )}
+                    </article>
                   );
                 })}
               </div>
@@ -368,8 +517,57 @@ export default function ExplorePage() {
                       </div>
                     ))}
                 </div>
+                {detail.resource === "missions" && (
+                  <section className="related-section tag-editor" aria-label="Mission tags">
+                    <h3>tags</h3>
+                    <div className="tag-list">
+                      {tagsOf(detail.record).length === 0 && (
+                        <span className="tag-empty">No tags yet.</span>
+                      )}
+                      {tagsOf(detail.record).map((tag) => (
+                        <span className="tag-chip-group" key={tag.tag_id}>
+                          <button
+                            className="tag-chip"
+                            onClick={() => searchTag(tag.name)}
+                            title={`Search ${tagQuery(tag.name)}`}
+                            type="button"
+                          >
+                            #{tag.name}
+                          </button>
+                          <button
+                            aria-label={`Remove tag ${tag.name}`}
+                            className="tag-remove"
+                            onClick={() => void removeTag(tag)}
+                            type="button"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                    <form className="tag-form" onSubmit={addTag}>
+                      <input
+                        aria-label="New tag"
+                        list="tag-suggestions"
+                        maxLength={30}
+                        onChange={(event) => setTagInput(event.target.value)}
+                        placeholder="Add a tag (letters, digits, spaces, hyphens)"
+                        value={tagInput}
+                      />
+                      <datalist id="tag-suggestions">
+                        {tagSuggestions.map((tag) => (
+                          <option key={tag.tag_id} value={tag.name} />
+                        ))}
+                      </datalist>
+                      <button disabled={tagSaving || !tagInput.trim()} type="submit">
+                        {tagSaving ? "Adding..." : "Add tag"}
+                      </button>
+                    </form>
+                    {tagError && <div className="error-message">{tagError}</div>}
+                  </section>
+                )}
                 {Object.entries(detail.record)
-                  .filter(([, value]) => Array.isArray(value))
+                  .filter(([field, value]) => field !== "tags" && Array.isArray(value))
                   .map(([field, value]) => (
                     <section className="related-section" key={field}>
                       <h3>{field.replaceAll("_", " ")}</h3>

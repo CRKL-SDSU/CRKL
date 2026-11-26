@@ -65,6 +65,34 @@ encourage caching it instead of querying the API from every client.
 - **Sample data:** the records in `specs/db/dummy_data.sql` are fictional
   sample data in the Launch Library 2 format, kept for tests and grading.
 
+## Search syntax and tags
+
+The search box on `/explore` accepts Gmail-style queries:
+
+| Query | Matches |
+| --- | --- |
+| `mars rover` | records matching both words (AND is the default) |
+| `mars OR venus` | either word (`OR` must be uppercase) |
+| `-radar` | records that do **not** match the word |
+| `"south pole"` | the exact phrase |
+| `tag:moon`, `tag:"ocean worlds"` | missions with that tag; agencies, spacecraft, and launches match through their missions |
+| `(tag:moon OR tag:mars) radar` | parentheses group terms; `OR` binds tighter than the implicit AND |
+
+Malformed queries, such as `(mars` without a closing parenthesis, return a 400
+error with a message that the page shows.
+
+**Tags** are user-defined labels on missions. Anyone can add or remove them in
+a mission's detail view; there is no login yet, so tags are recorded
+anonymously (`mission_tags.created_by` is `NULL`). The `users` table is in
+place so tags can record who added them once authentication is added. Tag
+names are stored lowercase with single spaces, can use letters, digits,
+spaces, and hyphens, and are at most 30 characters; a mission can have up to
+10 tags. Clicking a tag on a result card or in a detail view searches for it.
+
+After pulling this change, recreate the database so the new tables exist:
+`docker compose down -v && docker compose up --build`, or rerun `DDL.sql` and
+`dummy_data.sql` for a local MySQL.
+
 ## Start the servers
 
 There are two ways to run CRKL-Space. Both serve the app at

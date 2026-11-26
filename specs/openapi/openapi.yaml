@@ -29,6 +29,13 @@ paths:
   /launches/{id}:
     $ref: './paths/launches.yaml#/paths/launch_item'
 
+  /tags:
+    $ref: './paths/tags.yaml#/paths/tags_collection'
+  /missions/{id}/tags:
+    $ref: './paths/tags.yaml#/paths/mission_tags'
+  /missions/{id}/tags/{tag_id}:
+    $ref: './paths/tags.yaml#/paths/mission_tag_item'
+
 components:
   schemas:
     MissionDetail:
@@ -47,3 +54,7 @@ components:
       $ref: './schemas/launch.yaml#/components/schemas/LaunchDetail'
     LaunchListResponse:
       $ref: './schemas/launch.yaml#/components/schemas/LaunchListResponse'
+    Tag:
+      $ref: './schemas/tag.yaml#/components/schemas/Tag'
+    TagListResponse:
+      $ref: './schemas/tag.yaml#/components/schemas/TagListResponse'
