@@ -90,7 +90,9 @@ describe("ExplorePage", () => {
               image_url: "https://example.com/full.jpg",
               thumbnail_url: "https://example.com/small.jpg",
               image_credit: "Rocket Lab",
-              image_license: "Unknown"
+              image_license: "Unknown",
+              source_provider: "ll2",
+              source_id: "e3df2ecd"
             }
           ]
         }),
@@ -106,6 +108,7 @@ describe("ExplorePage", () => {
     const card = container.querySelector(".result-card")!;
     expect(card.textContent).not.toContain("example.com");
     expect(card.textContent).not.toContain("Rocket Lab");
+    expect(card.querySelector(".result-source")).toHaveTextContent("Source: Launch Library 2 · e3df2ecd");
   });
 
   it("shows the API's message for a malformed query", async () => {
@@ -183,7 +186,9 @@ describe("ExplorePage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
     fireEvent.click(await screen.findByRole("button", { name: /Real Mission/i }));
 
-    await waitFor(() => expect(screen.getByRole("dialog")).toHaveTextContent("status—"));
+    const dialog = await screen.findByRole("dialog");
+    await waitFor(() => expect(dialog).toHaveTextContent("Status—"));
+    expect(dialog).not.toHaveTextContent("mission id");
   });
 
   it("opens a record overlay and navigates to a related record", async () => {

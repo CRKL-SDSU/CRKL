@@ -5,6 +5,8 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { BrandLogo } from "../brand";
 import { aboutUrl } from "../site";
+import { CopyPromptButton } from "./copy-prompt-button";
+import { cardFields, detailFields, sourceLine, timestampLine } from "./fields";
 import { RecordImage } from "./record-image";
 
 type Resource = "missions" | "agencies" | "spacecraft" | "launches";
@@ -414,12 +416,8 @@ export default function ExplorePage() {
                     (value): value is string | number =>
                       typeof value === "string" || typeof value === "number"
                   );
-                  const details = Object.entries(record)
-                    .filter(
-                      ([key, value]) =>
-                        key !== "name" && key !== "title" && !key.startsWith("image_") && key !== "thumbnail_url" && typeof value !== "object"
-                    )
-                    .slice(0, 3);
+                  const fields = cardFields(record, resource);
+                  const description = typeof record.description === "string" ? record.description.trim() : "";
                   const tags = tagsOf(record);
                   return (
                     <article className="result-card" key={`${String(identifier || "record")}-${index}`}>
@@ -431,14 +429,15 @@ export default function ExplorePage() {
                         <RecordImage record={record} resource={resource} variant="card" />
                         <div className="result-card-top">
                           <span className="result-type">{resourceLabel(resource)}</span>
-                          {identifier && <span className="result-id">#{String(identifier)}</span>}
                         </div>
                         <h3>{titleFor(record)}</h3>
+                        {description && <p className="result-description">{description}</p>}
                         <div className="result-details">
-                          {details.map(([key, value]) => (
-                            <span key={key}><b>{key.replaceAll("_", " ")}</b>{displayValue(value)}</span>
+                          {fields.map((field) => (
+                            <span key={field.key}><b>{field.label}</b>{field.value}</span>
                           ))}
                         </div>
+                        {sourceLine(record) && <small className="result-source">{sourceLine(record)}</small>}
                       </button>
                       {tags.length > 0 && (
                         <div className="tag-list" aria-label="Tags">
@@ -521,14 +520,12 @@ export default function ExplorePage() {
               <>
                 <RecordImage record={detail.record} resource={detail.resource} variant="detail" />
                 <div className="detail-fields">
-                  {Object.entries(detail.record)
-                    .filter(([, value]) => value === null || typeof value !== "object")
-                    .map(([key, value]) => (
-                      <div key={key}>
-                        <b>{key.replaceAll("_", " ")}</b>
-                        <span>{displayValue(value)}</span>
-                      </div>
-                    ))}
+                  {detailFields(detail.record, detail.resource).map((field) => (
+                    <div className={field.key === "description" ? "detail-field-wide" : undefined} key={field.key}>
+                      <b>{field.label}</b>
+                      <span>{field.value}</span>
+                    </div>
+                  ))}
                 </div>
                 {detail.resource === "missions" && (
                   <section className="related-section tag-editor" aria-label="Mission tags">
@@ -605,13 +602,22 @@ export default function ExplorePage() {
                               type="button"
                             >
                               <span>{titleFor(relatedRecord)}</span>
-                              {relatedId !== undefined && <small>#{String(relatedId)}</small>}
+                              {typeof relatedRecord.role === "string" && relatedRecord.role && (
+                                <small>{relatedRecord.role}</small>
+                              )}
                             </button>
                           );
                         })}
                       </div>
                     </section>
                   ))}
+                <div className="detail-meta">
+                  <div className="detail-meta-lines">
+                    {sourceLine(detail.record) && <span>{sourceLine(detail.record)}</span>}
+                    {timestampLine(detail.record) && <span>{timestampLine(detail.record)}</span>}
+                  </div>
+                  <CopyPromptButton record={detail.record} resource={detail.resource} />
+                </div>
               </>
             )}
           </section>
