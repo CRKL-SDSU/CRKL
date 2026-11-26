@@ -17,6 +17,7 @@
   --error-bg: #351d25;
   --success-bg: #22392f;
   --orbit: #586272;
+  --media-bg: #d9dfe8;
   --backdrop: rgba(3, 5, 9, .78);
   --shadow: rgba(0, 0, 0, .55);
   color-scheme: dark;
@@ -37,6 +38,7 @@
     --red: #b8323d;
     --on-accent: #ffffff;
     --code-bg: #f1f4f8;
+    --media-bg: #eef1f6;
     --code-text: #2a3445;
     --error-bg: #fde8ea;
     --success-bg: #dcf2e6;
@@ -141,8 +143,16 @@ footer a:hover { color: var(--accent); }
 .result-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
 .result-card { background: var(--panel); border: 1px solid var(--line); color: var(--text); display: flex; flex-direction: column; min-height: 190px; }
 .result-card:hover { border-color: var(--accent); }
-.result-card-main { background: transparent; border: 0; color: inherit; flex: 1; padding: 20px; text-align: left; width: 100%; }
+/* a button centers its content vertically, so lay it out as a top-aligned column instead */
+.result-card-main { background: transparent; border: 0; color: inherit; display: flex; flex: 1; flex-direction: column; justify-content: flex-start; padding: 20px; text-align: left; width: 100%; }
 .result-card > .tag-list { padding: 0 20px 18px; }
+/* record images: logos and photos of any shape fit inside a fixed frame without cropping */
+.record-image { align-items: center; background: var(--media-bg); display: flex; justify-content: center; overflow: hidden; }
+.record-image img { display: block; height: 100%; object-fit: contain; width: 100%; }
+.record-image-card { height: 112px; margin-bottom: 16px; padding: 10px; }
+.record-image-detail { height: 240px; margin-bottom: 22px; padding: 16px; }
+.record-image-empty { background: var(--panel-light); color: var(--orbit); }
+.record-image-empty svg { height: 44px; width: 44px; }
 .search-syntax { color: var(--muted); font-family: "DM Mono", monospace; font-size: 10px; margin: -6px 0 16px; }
 .search-syntax code { color: var(--text); }
 .tag-list { align-items: center; display: flex; flex-wrap: wrap; gap: 6px; }
