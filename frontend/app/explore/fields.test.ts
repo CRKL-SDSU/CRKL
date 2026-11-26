@@ -58,6 +58,7 @@ describe("metadata lines", () => {
   it("names the source and the record's timestamps", () => {
     expect(sourceLine(launch)).toBe("Source: Launch Library 2 · a1b2");
     expect(timestampLine(launch)).toBe("Added 2026-11-26 18:29 UTC · Updated 2026-11-27 09:00 UTC");
+    expect(sourceLine({ source_provider: "dummy", source_id: "ag-101" })).toBe("Source: Dummy · ag-101");
     expect(sourceLine({})).toBeNull();
     expect(timestampLine({ updated_at: "2026-11-27T09:00:00" })).toBe("Updated 2026-11-27 09:00 UTC");
   });

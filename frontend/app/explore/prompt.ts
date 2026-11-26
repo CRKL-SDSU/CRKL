@@ -1,6 +1,6 @@
 // Builds a ready-to-paste LLM prompt for a record, so visitors can dig into primary sources.
 
-import { Resource, detailFields, EMPTY_VALUE } from "./fields";
+import { PROVIDERS, Resource, detailFields, EMPTY_VALUE } from "./fields";
 
 type ApiRecord = Record<string, unknown>;
 
@@ -91,7 +91,7 @@ export function buildPrompt(record: ApiRecord, resource: Resource): string {
   if (provider === "ll2") {
     lines.push(`Source: Launch Library 2 by The Space Devs${sourceId ? `, ID ${sourceId}` : ""}`);
   } else if (provider) {
-    lines.push(`Source: ${provider}${sourceId ? `, ID ${sourceId}` : ""}`);
+    lines.push(`Source: ${PROVIDERS[provider] ?? provider}${sourceId ? `, ID ${sourceId}` : ""}`);
   }
 
   const links = primaryDataLinks(record, resource);

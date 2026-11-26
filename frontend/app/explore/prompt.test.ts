@@ -26,7 +26,7 @@ describe("ll2Url", () => {
 
   it("gives no link for missions, other sources, or odd IDs", () => {
     expect(ll2Url({ source_provider: "ll2", source_id: "12" }, "missions")).toBeNull();
-    expect(ll2Url({ source_provider: "sample", source_id: "ag-101" }, "agencies")).toBeNull();
+    expect(ll2Url({ source_provider: "dummy", source_id: "ag-101" }, "agencies")).toBeNull();
     expect(ll2Url({ source_provider: "ll2", source_id: "../x" }, "agencies")).toBeNull();
   });
 });
@@ -59,8 +59,8 @@ describe("buildPrompt", () => {
   });
 
   it("leaves out the primary data section when there is no LL2 link", () => {
-    const prompt = buildPrompt({ name: "Test", source_provider: "sample", source_id: "x" }, "agencies");
+    const prompt = buildPrompt({ name: "Test", source_provider: "dummy", source_id: "ag-101" }, "agencies");
     expect(prompt).not.toContain("Primary data");
-    expect(prompt).toContain("Source: sample, ID x");
+    expect(prompt).toContain("Source: Dummy, ID ag-101");
   });
 });

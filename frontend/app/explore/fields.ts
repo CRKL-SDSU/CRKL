@@ -37,7 +37,8 @@ const DETAIL_KEYS: Record<Resource, string[]> = {
 
 export const EMPTY_VALUE = "—";
 
-const PROVIDERS: Record<string, string> = { ll2: "Launch Library 2" };
+// display names for source_provider; "dummy" marks the fictional sample data in specs/db/dummy_data.sql
+export const PROVIDERS: Record<string, string> = { ll2: "Launch Library 2", dummy: "Dummy" };
 
 const DATE_TIME = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]00:?00)?$/;
 
