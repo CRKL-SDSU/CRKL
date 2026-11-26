@@ -417,7 +417,7 @@ export default function ExplorePage() {
                   const details = Object.entries(record)
                     .filter(
                       ([key, value]) =>
-                        key !== "name" && key !== "title" && key !== "image_url" && typeof value !== "object"
+                        key !== "name" && key !== "title" && !key.startsWith("image_") && key !== "thumbnail_url" && typeof value !== "object"
                     )
                     .slice(0, 3);
                   const tags = tagsOf(record);

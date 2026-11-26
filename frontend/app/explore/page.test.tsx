@@ -78,6 +78,36 @@ describe("ExplorePage", () => {
     expect(screen.getByRole("searchbox")).toHaveValue('tag:"ocean worlds"');
   });
 
+  it("shows a card's thumbnail without listing the image fields as details", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          count: 1,
+          results: [
+            {
+              launch_id: 7,
+              name: "Night Owls",
+              image_url: "https://example.com/full.jpg",
+              thumbnail_url: "https://example.com/small.jpg",
+              image_credit: "Rocket Lab",
+              image_license: "Unknown"
+            }
+          ]
+        }),
+        { status: 200 }
+      )
+    );
+
+    const { container } = render(<ExplorePage />);
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    await screen.findByText("Night Owls");
+
+    expect(container.querySelector(".result-card img")).toHaveAttribute("src", "https://example.com/small.jpg");
+    const card = container.querySelector(".result-card")!;
+    expect(card.textContent).not.toContain("example.com");
+    expect(card.textContent).not.toContain("Rocket Lab");
+  });
+
   it("shows the API's message for a malformed query", async () => {
     vi.spyOn(global, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ detail: "A parenthesis is missing a closing ')'." }), {

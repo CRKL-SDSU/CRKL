@@ -61,7 +61,11 @@ encourage caching it instead of querying the API from every client.
   Historic records come partly from third-party sources such as GCAT, Gunter's
   Space Page, and spacefacts.de.
 - **Images:** we store image URLs only; the images themselves are not copied
-  into this repository.
+  into this repository. Images belong to their owners (agencies, news outlets,
+  photographers), not to The Space Devs, and most have an "Unknown" license, so
+  the detail panel shows each image's credit and license name when the API
+  provides them. Result cards use the API's thumbnails, which are square crops
+  of photos.
 - **Sample data:** the records in `specs/db/dummy_data.sql` are fictional
   sample data in the Launch Library 2 format, kept for tests and grading.
 
