@@ -36,6 +36,7 @@ CREATE TABLE launches (
     name VARCHAR(255) NOT NULL,
     net DATETIME NOT NULL,
     status VARCHAR(50) NOT NULL,
+    launch_service_provider_id INT, -- the agency that carried out the launch, as LL2 records it; NULL when unknown
     image_url TEXT,
     thumbnail_url TEXT, -- small square crop of a photo; not used for logos
     image_credit VARCHAR(255),
@@ -44,7 +45,8 @@ CREATE TABLE launches (
     window_end DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_source (source_provider, source_id)
+    UNIQUE KEY uq_source (source_provider, source_id),
+    FOREIGN KEY (launch_service_provider_id) REFERENCES agencies(agency_id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- =========================================================================

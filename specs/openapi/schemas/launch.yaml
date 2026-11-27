@@ -17,6 +17,14 @@ components:
           format: date-time
         status:
           type: string
+        launch_service_provider_id:
+          type: integer
+          nullable: true
+          description: The agency_id of the agency that carried out the launch, as Launch Library 2 records it
+        launch_service_provider:
+          type: string
+          nullable: true
+          description: That agency's name
         window_start:
           type: string
           format: date-time

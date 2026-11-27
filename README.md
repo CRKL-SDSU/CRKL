@@ -66,6 +66,15 @@ encourage caching it instead of querying the API from every client.
   the detail panel shows each image's credit and license name when the API
   provides them. Result cards use the API's thumbnails, which are square crops
   of photos.
+- **Relationships:** we load the relationships as Launch Library 2 records
+  them and do not infer new ones. Launch Library 2 lists the agencies behind a
+  mission for only a few missions (about 10 in our snapshot), so most real
+  agencies have no related missions. It records most agency involvement as a
+  launch's launch service provider, which CRKL shows on each launch as
+  **Launch provider** and does not copy into a mission's agencies. The launch
+  list responses we import also do not say which spacecraft flew on a launch,
+  so real spacecraft have no related missions yet. The sample data has more
+  relationships than the real data for this reason.
 - **Sample data:** the records in `specs/db/dummy_data.sql` are fictional
   sample data in the Launch Library 2 format, kept for tests and grading.
   Their `source_provider` is `dummy`, so the site labels them "Source: Dummy"

@@ -9,6 +9,8 @@ const launch = {
   name: "Artemis IV",
   net: "2028-09-12T04:30:00",
   status: "Scheduled",
+  launch_service_provider_id: 4,
+  launch_service_provider: "NASA",
   image_url: "https://example.com/a.jpg",
   thumbnail_url: null,
   window_start: "2028-09-12T04:00:00",
@@ -33,7 +35,8 @@ describe("cardFields", () => {
   it("shows the resource's fixed fields, with a dash when empty", () => {
     expect(cardFields(launch, "launches")).toEqual([
       { key: "net", label: "Launch date (NET)", value: "2028-09-12 04:30 UTC" },
-      { key: "status", label: "Status", value: "Scheduled" }
+      { key: "status", label: "Status", value: "Scheduled" },
+      { key: "launch_service_provider", label: "Launch provider", value: "NASA" }
     ]);
     expect(cardFields({ status: null, target_body: "Moon" }, "missions")).toEqual([
       { key: "target_body", label: "Target", value: "Moon" },
@@ -47,9 +50,12 @@ describe("detailFields", () => {
     expect(detailFields(launch, "launches")).toEqual([
       { key: "net", label: "Launch date (NET)", value: "2028-09-12 04:30 UTC" },
       { key: "status", label: "Status", value: "Scheduled" },
+      { key: "launch_service_provider", label: "Launch provider", value: "NASA" },
       { key: "window_start", label: "Window opens", value: "2028-09-12 04:00 UTC" },
       { key: "window_end", label: "Window closes", value: "—" }
     ]);
+    // the provider's id is an internal key; only its name is shown
+    expect(detailFields(launch, "launches").map((field) => field.key)).not.toContain("launch_service_provider_id");
     expect(detailFields({}, "agencies").map((field) => field.label)).toEqual(["Abbreviation", "Country"]);
   });
 });

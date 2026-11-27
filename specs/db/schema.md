@@ -8,7 +8,7 @@ This database architecture is designed for a space exploration information porta
 
 - **sources**: Base table for all data sources containing shared network and status metadata (Class Table Inheritance base).
 - **organizations** (or **agencies**): Sub-type table extending sources with organization-specific attributes (name, abbreviation, country code, image URL).
-- **launches**: Master table tracking launch events, including launch windows, status, and net (No-Earlier-Than) times.
+- **launches**: Master table tracking launch events, including launch windows, status, net (No-Earlier-Than) times, and the launch service provider (`launch_service_provider_id`, the agency that carried out the launch).
 - **spacecraft**: Master table storing spacecraft variations, types, and technical specifications.
 - **missions**: Core table tracking specific space missions, target bodies, statuses, and descriptive metadata.
 - **mission_agencies**: Junction table connecting missions to agencies with assigned operational roles (e.g., Primary, Contributor).
@@ -21,6 +21,7 @@ This database architecture is designed for a space exploration information porta
 ## Relationships & Architecture
 
 - **Missions & Master Data**: Missions maintain many-to-many relationships with agencies, spacecraft, and launches via dedicated junction tables (`mission_agencies`, `mission_spacecraft`, `mission_launches`), supporting rich nested JSON payload generation for frontend consumption.
+- **Launch Service Provider**: `launches.launch_service_provider_id` points to the agency that carried out the launch, as Launch Library 2 records it. It is `NULL` when the source does not name one, and it is set to `NULL` if that agency is deleted. It is separate from `mission_agencies`, which lists the agencies behind a mission.
 - **Source Provider Tracking**: Master records incorporate source provider identifiers (`source_provider`, `source_id`) to ensure seamless upstream synchronization and data provenance tracking.
 
 ## Future Considerations: Handling Unbound Entities (Launch / Spacecraft)

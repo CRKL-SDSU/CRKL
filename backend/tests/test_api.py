@@ -73,6 +73,21 @@ def test_launch_detail_includes_related_missions() -> None:
     assert fetch_all.call_args.args[1] == (7,)
 
 
+def test_launches_return_their_launch_service_provider_name() -> None:
+    with patch("endpoints.fetch_one", return_value={"count": 1}), patch(
+        "endpoints.fetch_all", return_value=[]
+    ) as fetch_all:
+        client.get("/api/v1/launches")
+    assert "AS launch_service_provider" in fetch_all.call_args.args[0]
+
+    with patch(
+        "endpoints.fetch_one", return_value={"launch_id": 7, "launch_service_provider": "NASA"}
+    ) as fetch_one, patch("endpoints.fetch_all", return_value=[]):
+        response = client.get("/api/v1/launches/7")
+    assert "AS launch_service_provider" in fetch_one.call_args.args[0]
+    assert response.json()["launch_service_provider"] == "NASA"
+
+
 def test_detail_returns_not_found_for_missing_record() -> None:
     with patch("endpoints.fetch_one", return_value=None):
         response = client.get("/api/v1/missions/999")

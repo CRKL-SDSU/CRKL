@@ -184,6 +184,7 @@ def load_launches(launches: list[dict]) -> int:
             name,
             net,
             status,
+            launch_service_provider_id,
             image_url,
             thumbnail_url,
             image_credit,
@@ -191,11 +192,12 @@ def load_launches(launches: list[dict]) -> int:
             window_start,
             window_end
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
             net = VALUES(net),
             status = VALUES(status),
+            launch_service_provider_id = VALUES(launch_service_provider_id),
             image_url = VALUES(image_url),
             thumbnail_url = VALUES(thumbnail_url),
             image_credit = VALUES(image_credit),
@@ -213,6 +215,11 @@ def load_launches(launches: list[dict]) -> int:
 
             # with the connection cursor, prepare the launch data for insertion
             with connection.cursor() as cursor:
+                # map LL2 agency IDs to our agency_id, so each launch can point to its launch service provider
+                # NOTE: a provider that isn't in the agencies table is stored as NULL
+                cursor.execute("SELECT source_id, agency_id FROM agencies WHERE source_provider = 'll2'")
+                agency_ids = {row["source_id"]: row["agency_id"] for row in cursor.fetchall()}
+
                 values = [
                     (
                         launch["source_provider"],
@@ -220,6 +227,7 @@ def load_launches(launches: list[dict]) -> int:
                         launch["name"],
                         launch["net"],
                         launch["status"],
+                        agency_ids.get(launch["launch_service_provider_source_id"]),
                         launch["image_url"],
                         launch["thumbnail_url"],
                         launch["image_credit"],

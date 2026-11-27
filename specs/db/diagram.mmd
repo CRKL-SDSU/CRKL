@@ -2,6 +2,7 @@ erDiagram
     agencies ||--o{ mission_agencies : "participates_in"
     missions ||--o{ mission_agencies : "involves_agencies"
     launches ||--o{ mission_launches : "triggers"
+    agencies |o--o{ launches : "launch_service_provider"
     missions ||--o{ mission_launches : "involves_launches"
     spacecraft ||--o{ mission_spacecraft : "used_in"
     missions ||--o{ mission_spacecraft : "utilizes_spacecraft"
@@ -29,6 +30,7 @@ erDiagram
         string name
         datetime net
         string status
+        int launch_service_provider_id FK "NULL = unknown"
         string image_url
         string thumbnail_url
         string image_credit

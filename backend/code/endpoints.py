@@ -144,6 +144,19 @@ MISSION_TAGS_COLUMN = """(
             WHERE mt.mission_id = missions.mission_id
         ) AS tags"""
 
+# the name of each launch's launch service provider, returned alongside the launch's columns
+LAUNCH_PROVIDER_COLUMN = """(
+            SELECT a.name
+            FROM agencies a
+            WHERE a.agency_id = launches.launch_service_provider_id
+        ) AS launch_service_provider"""
+
+# the extra columns each resource returns alongside its own columns
+EXTRA_COLUMNS = {
+    "missions": MISSION_TAGS_COLUMN,
+    "launches": LAUNCH_PROVIDER_COLUMN,
+}
+
 # the maximum number of tags a single mission can have
 MAX_TAGS_PER_MISSION = 10
 
@@ -263,8 +276,8 @@ def _list_resource(
         condition, parameters = _search_condition(expression, resource, related)
         where = f" WHERE {condition}"
 
-    # missions also return their tags, so result cards can show them
-    columns = f"*, {MISSION_TAGS_COLUMN}" if resource == "missions" else "*"
+    # missions also return their tags, and launches their provider's name, so result cards can show them
+    columns = f"*, {EXTRA_COLUMNS[resource]}" if resource in EXTRA_COLUMNS else "*"
 
     # "try to fetch the count of records and the actual records from this database and make an exception for any potential database errors"
     try:
@@ -302,13 +315,17 @@ def _list_resource(
 # the record ID
 # the relationship queries to fetch related records from other tables
 def _get_detail(
-    table: str, id_column: str, record_id: int, relationship_queries: list[tuple[str, str]]
+    table: str,
+    id_column: str,
+    record_id: int,
+    relationship_queries: list[tuple[str, str]],
+    columns: str = "*",
 ) -> dict[str, Any]:
 
     # "try to fetch a record from the database and make an exception for any potential database errors"
     try:
         record = fetch_one(
-            f"SELECT * FROM {table} WHERE {id_column} = %s", (record_id,)
+            f"SELECT {columns} FROM {table} WHERE {id_column} = %s", (record_id,)
         )
 
         # "if no record was found, raise an HTTPException"
@@ -462,6 +479,7 @@ def get_launch(id: int) -> dict[str, Any]:
                    ORDER BY m.mission_id""",
             )
         ],
+        columns=f"*, {LAUNCH_PROVIDER_COLUMN}",
     )
 
 
