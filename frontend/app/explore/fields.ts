@@ -10,6 +10,7 @@ const LABELS: Record<string, string> = {
   abbrev: "Abbreviation",
   country_code: "Country",
   description: "Description",
+  launch_service_provider: "Launch provider",
   net: "Launch date (NET)",
   role: "Role",
   spacecraft_type: "Type",
@@ -24,7 +25,7 @@ const CARD_KEYS: Record<Resource, string[]> = {
   missions: ["target_body", "status"],
   agencies: ["abbrev", "country_code"],
   spacecraft: ["spacecraft_type"],
-  launches: ["net", "status"]
+  launches: ["net", "status", "launch_service_provider"]
 };
 
 // the fields in the detail panel, in order; empty ones still show as "—"
@@ -32,7 +33,7 @@ const DETAIL_KEYS: Record<Resource, string[]> = {
   missions: ["description", "target_body", "status"],
   agencies: ["abbrev", "country_code"],
   spacecraft: ["spacecraft_type"],
-  launches: ["net", "status", "window_start", "window_end"]
+  launches: ["net", "status", "launch_service_provider", "window_start", "window_end"]
 };
 
 export const EMPTY_VALUE = "—";

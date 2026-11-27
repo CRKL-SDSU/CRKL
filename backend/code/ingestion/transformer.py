@@ -105,6 +105,11 @@ def transform_launch(launch: dict) -> dict:
     status = launch.get("status") or {}
     status_name = status.get("name")
 
+    # get the LL2 ID of the agency that carried out the launch, if it exists
+    # NOTE: the loader turns it into our agency_id, so agencies must be loaded first
+    provider = launch.get("launch_service_provider") or {}
+    provider_id = provider.get("id")
+
     # get the image & its metadata, if it exists
     image = launch.get("image") or {}
     image_url = image.get("image_url")
@@ -129,6 +134,7 @@ def transform_launch(launch: dict) -> dict:
         "name": launch["name"],
         "net": net,
         "status": status_name,
+        "launch_service_provider_source_id": str(provider_id) if provider_id is not None else None,
         "image_url": image_url,
         "thumbnail_url": thumbnail_url,
         "image_credit": image_credit,

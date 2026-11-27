@@ -29,3 +29,10 @@ def test_every_resource_table_has_the_image_columns() -> None:
     tables = _tables(SCHEMA_FILES[0])
     for table in ("agencies", "spacecraft", "launches", "missions"):
         assert IMAGE_COLUMNS <= set(tables[table]), table
+
+
+def test_launches_point_to_their_launch_service_provider() -> None:
+    for path in SCHEMA_FILES:
+        text = path.read_text()
+        assert "launch_service_provider_id" in _tables(path)["launches"], path
+        assert "FOREIGN KEY (launch_service_provider_id) REFERENCES agencies(agency_id) ON DELETE SET NULL" in text, path
