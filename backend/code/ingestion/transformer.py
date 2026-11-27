@@ -8,7 +8,8 @@
 from datetime import datetime, timezone
 
 # the source provider for the real data (from LL2 API)
-source_provider = "launch_library_2"
+# NOTE: was originally "launch_library_2"
+source_provider = "ll2"
 
 # function that will transform an AGENCY record
 def transform_agency(agency: dict) -> dict:
@@ -22,15 +23,18 @@ def transform_agency(agency: dict) -> dict:
         A dictionary containing the fields required by the agencies table
     """
 
-    # get the alpha-2 code, if it exists
+    # get the alpha-3 code, if it exists
     countries = agency.get("country") or []
-    if countries: country_code = countries[0].get("alpha_2_code")
+    # NOTE: was originally "alpha_2_code"
+    if countries: country_code = countries[0].get("alpha_3_code")
     else: country_code = None
 
-    # get the image & its URL, if it exists
-    image = agency.get("image")
-    if isinstance(image, dict): image_url = image.get("image_url")
-    else: image_url = image
+    # get the image & its metadata, if it exists
+    image = agency.get("image") or {}
+    image_url = image.get("image_url")
+    thumbnail_url = image.get("thumbnail_url")
+    image_credit = image.get("credit")
+    image_license = (image.get("license") or {}).get("name")
 
     # returning the agency record fitted to our database
     return {
@@ -39,7 +43,10 @@ def transform_agency(agency: dict) -> dict:
         "name": agency["name"],
         "abbrev": agency.get("abbrev"),
         "country_code": country_code,
-        "image_url": image_url
+        "image_url": image_url,
+        "thumbnail_url": thumbnail_url,
+        "image_credit": image_credit,
+        "image_license": image_license
         
     }
 
@@ -50,7 +57,7 @@ def transform_spacecraft(spacecraft: dict) -> dict:
     Fits a raw LL2 spacecraft record into the CRKL database
 
     Args:
-        agency: A raw spacecraft dictionary returned by the API
+        spacecraft: A raw spacecraft dictionary returned by the API
 
     Returns:
         A dictionary containing the fields required by the spacecraft table
@@ -62,10 +69,12 @@ def transform_spacecraft(spacecraft: dict) -> dict:
     spacecraft_type = spacecraft_config.get("type") or {}
     type_name = spacecraft_type.get("name")
 
-    # get the image & URL, if it exists
-    image = spacecraft.get("image")
-    if isinstance(image, dict): image_url = image.get("image_url")
-    else: image_url = image
+    # get the image & its metadata, if it exists
+    image = spacecraft.get("image") or {}
+    image_url = image.get("image_url")
+    thumbnail_url = image.get("thumbnail_url")
+    image_credit = image.get("credit")
+    image_license = (image.get("license") or {}).get("name")
 
     # returning the spacecraft record fitted to our database
     return {
@@ -73,7 +82,10 @@ def transform_spacecraft(spacecraft: dict) -> dict:
         "source_id": str(spacecraft["id"]),
         "name": spacecraft["name"],
         "spacecraft_type": type_name,
-        "image_url": image_url
+        "image_url": image_url,
+        "thumbnail_url": thumbnail_url,
+        "image_credit": image_credit,
+        "image_license": image_license
 
     }
 
@@ -93,9 +105,12 @@ def transform_launch(launch: dict) -> dict:
     status = launch.get("status") or {}
     status_name = status.get("name")
 
-    # get the image & its URL, if it exists
+    # get the image & its metadata, if it exists
     image = launch.get("image") or {}
     image_url = image.get("image_url")
+    thumbnail_url = image.get("thumbnail_url")
+    image_credit = image.get("credit")
+    image_license = (image.get("license") or {}).get("name")
 
     # converting the LL2 timestamps into UTC datetime objects for MySQL
     net = datetime.fromisoformat(launch["net"].replace("Z", "+00:00"))
@@ -115,6 +130,9 @@ def transform_launch(launch: dict) -> dict:
         "net": net,
         "status": status_name,
         "image_url": image_url,
+        "thumbnail_url": thumbnail_url,
+        "image_credit": image_credit,
+        "image_license": image_license,
         "window_start": window_start,
         "window_end": window_end
 
@@ -161,10 +179,12 @@ def transform_mission(mission: dict) -> dict:
     orbit = mission.get("orbit") or {}
     celestial_body = orbit.get("celestial_body") or {}
 
-    # get the mission image & its url, if it exists
-    image = mission.get("image")
-    if isinstance(image, dict): image_url = image.get("image_url")
-    else: image_url = image
+    # get the mission image & its metadata, if it exists
+    image = mission.get("image") or {}
+    image_url = image.get("image_url")
+    thumbnail_url = image.get("thumbnail_url")
+    image_credit = image.get("credit")
+    image_license = (image.get("license") or {}).get("name")
 
     # returning the mission record fitted to our database
     return {
@@ -174,6 +194,9 @@ def transform_mission(mission: dict) -> dict:
         "description": mission.get("description"),
         "target_body": celestial_body.get("name"),
         "status": mission.get("status"), # --> as of now, returns "None" because LL2 mission records lack this field
-        "image_url": image_url
+        "image_url": image_url,
+        "thumbnail_url": thumbnail_url,
+        "image_credit": image_credit,
+        "image_license": image_license
 
     }

@@ -33,14 +33,20 @@ def load_agencies(agencies: list[dict]) -> int:
             name,
             abbrev,
             country_code,
-            image_url
+            image_url,
+            thumbnail_url,
+            image_credit,
+            image_license
         )
-        VALUES (%s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
             abbrev = VALUES(abbrev),
             country_code = VALUES(country_code),
-            image_url = VALUES(image_url)
+            image_url = VALUES(image_url),
+            thumbnail_url = VALUES(thumbnail_url),
+            image_credit = VALUES(image_credit),
+            image_license = VALUES(image_license)
         """
 
     # using the logic from db_management.py to create a db connection
@@ -60,7 +66,10 @@ def load_agencies(agencies: list[dict]) -> int:
                         agency["name"],
                         agency["abbrev"],
                         agency["country_code"],
-                        agency["image_url"]
+                        agency["image_url"],
+                        agency["thumbnail_url"],
+                        agency["image_credit"],
+                        agency["image_license"]
                     )
                     for agency in agencies
                 ]
@@ -85,7 +94,7 @@ def load_spacecraft(spacecraft: list[dict]) -> int:
     Loads transformed spacecraft records into the spacecraft table
 
     Args:
-        agencies: A list of the transformed spacecraft dictionaries
+        spacecraft: A list of the transformed spacecraft dictionaries
 
     Returns:
         The number of processed spacecraft records
@@ -101,13 +110,19 @@ def load_spacecraft(spacecraft: list[dict]) -> int:
             source_id,
             name,
             spacecraft_type,
-            image_url
+            image_url,
+            thumbnail_url,
+            image_credit,
+            image_license
         )
-        VALUES (%s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
             spacecraft_type = VALUES(spacecraft_type),
-            image_url = VALUES(image_url)
+            image_url = VALUES(image_url),
+            thumbnail_url = VALUES(thumbnail_url),
+            image_credit = VALUES(image_credit),
+            image_license = VALUES(image_license)
     """
 
     # using the logic from db_management.py to create a db connection
@@ -125,7 +140,10 @@ def load_spacecraft(spacecraft: list[dict]) -> int:
                         item["source_id"],
                         item["name"],
                         item["spacecraft_type"],
-                        item["image_url"]
+                        item["image_url"],
+                        item["thumbnail_url"],
+                        item["image_credit"],
+                        item["image_license"]
                     )
                     for item in spacecraft
                 ]
@@ -150,7 +168,7 @@ def load_launches(launches: list[dict]) -> int:
     Loads transformed launches records into the launches table
 
     Args:
-        agencies: A list of the transformed launches dictionaries
+        launches: A list of the transformed launches dictionaries
 
     Returns:
         The number of processed launches records
@@ -167,15 +185,21 @@ def load_launches(launches: list[dict]) -> int:
             net,
             status,
             image_url,
+            thumbnail_url,
+            image_credit,
+            image_license,
             window_start,
             window_end
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
             net = VALUES(net),
             status = VALUES(status),
             image_url = VALUES(image_url),
+            thumbnail_url = VALUES(thumbnail_url),
+            image_credit = VALUES(image_credit),
+            image_license = VALUES(image_license),
             window_start = VALUES(window_start),
             window_end = VALUES(window_end)
     """
@@ -197,6 +221,9 @@ def load_launches(launches: list[dict]) -> int:
                         launch["net"],
                         launch["status"],
                         launch["image_url"],
+                        launch["thumbnail_url"],
+                        launch["image_credit"],
+                        launch["image_license"],
                         launch["window_start"],
                         launch["window_end"]
                     )
@@ -223,32 +250,23 @@ def load_missions(missions: list[dict]) -> int:
     # "if there are no missions, terminate immediately"
     if not missions: return 0
 
-    # NOTE: the check for mission_statuses is here because, currently, none of the missions have status labels
-    # to be able to verify load_missions, you'll need to have some launches records already saved, either through a checkpoint file or the cache
-    # while testing, I was able to create a checkpoint file containing ~1425 records as a reference for testing
-
-    # check for missing required mission statuses before attempting db insertion
-    missing_statuses = sum(not mission.get("status") for mission in missions)
-
-    # "if there are missing statuses, raise a ValueError stating that a status is required"
-    if missing_statuses:
-        raise ValueError(
-            f"Cannot load missions: {missing_statuses} records are missing a required status."
-        )
-
     # creating an SQL query to insert or update a mission record
     query = """
         INSERT INTO missions (
             source_provider, source_id, name, description,
-            target_body, status, image_url
+            target_body, status, image_url, thumbnail_url,
+            image_credit, image_license
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
             description = VALUES(description),
             target_body = VALUES(target_body),
             status = VALUES(status),
-            image_url = VALUES(image_url)
+            image_url = VALUES(image_url),
+            thumbnail_url = VALUES(thumbnail_url),
+            image_credit = VALUES(image_credit),
+            image_license = VALUES(image_license)
     """
 
     # using the logic from db_management.py to create a db connection
@@ -268,7 +286,10 @@ def load_missions(missions: list[dict]) -> int:
                         mission["description"],
                         mission["target_body"],
                         mission["status"],
-                        mission["image_url"]
+                        mission["image_url"],
+                        mission["thumbnail_url"],
+                        mission["image_credit"],
+                        mission["image_license"]
                     )
                     for mission in missions
                 ]
@@ -285,3 +306,111 @@ def load_missions(missions: list[dict]) -> int:
 
     # returning the total # of loaded records in the missions table
     return len(missions)
+
+
+# === the following functions will fill in the junction tables === #
+# (i.e., mission_agencies, mission_spacecraft, mission_launches)
+
+# function that will load mission-agency relationships into that junction table
+def load_mission_agencies(relationships: list[tuple[str, str]]) -> int:
+    """
+    Loads mission-agency relationships into the mission_agencies table
+
+    Args:
+        relationships: A list of (mission_source_id, agency_source_id) pairs
+
+    Returns:
+        The number of inserted or processed relationships
+    """
+
+    # "if there are no relationships, terminate immediately"
+    if not relationships: return 0
+
+    # query statement
+    query = """
+        INSERT IGNORE INTO mission_agencies (mission_id, agency_id)
+        SELECT missions.mission_id, agencies.agency_id
+        FROM missions
+        JOIN agencies
+            ON agencies.source_provider = 'll2'
+            AND agencies.source_id = %s
+        WHERE missions.source_provider = 'll2'
+            AND missions.source_id = %s
+    """
+
+    # using the logic from db_management.py to createa  db connection
+    with database_connection() as connection:
+        # "try to start a db transaction, make an exception for any necessary rollbacks"
+        try:
+            # begin the connection
+            connection.begin()
+
+            # with the connection cursor, prepare the data for insertion
+            with connection.cursor() as cursor:
+                values = [(agency_id, mission_id) for mission_id, agency_id in relationships]
+                cursor.executemany(query, values)
+
+                loaded_count = cursor.rowcount
+
+            connection.commit()
+
+        # exception, at which initiate a rollback
+        except Exception:
+            connection.rollback()
+            raise
+
+    return loaded_count
+
+
+# function that will load mission-launch relationships into that junction table
+def load_mission_launches(relationships: list[tuple[str, str]]) -> int:
+    """
+    Loads mission-launch relationships into the mission_launches table
+
+    Args:
+        relationships: A list of (mission_source_id, launch_source_id) pairs
+
+    Returns:
+        The number of inserted or processed relationships
+    """
+
+    # "if there are no relationships, terminate immediately"
+    if not relationships: return 0
+
+    # query statement
+    query = """
+        INSERT IGNORE INTO mission_launches (mission_id, launch_id)
+        SELECT missions.mission_id, launches.launch_id
+        FROM missions
+        JOIN launches
+            ON launches.source_provider = 'll2'
+            AND launches.source_id = %s
+        WHERE missions.source_provider = 'll2'
+            AND missions.source_id = %s
+    """
+
+    # using the logic from db_management.py to create a db connection
+    with database_connection() as connection:
+        # "try to start a db transaction, make an exception for any necessary rollbacks"
+        try:
+            # begin the connection
+            connection.begin()
+
+            # with the connection cursor, prepare the data for insertion
+            with connection.cursor() as cursor:
+                values = [
+                    (launch_id, mission_id)
+                    for mission_id, launch_id in relationships
+                ]
+                cursor.executemany(query, values)
+
+                loaded_count = cursor.rowcount
+
+            connection.commit()
+
+        # exception, in which case rollback
+        except Exception:
+            connection.rollback()
+            raise
+
+    return loaded_count
