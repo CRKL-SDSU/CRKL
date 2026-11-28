@@ -227,7 +227,9 @@ def _search_condition(node: Node, resource: str, related: bool) -> tuple[str, tu
             return TAG_SEARCH[resource], [current.name]
         if isinstance(current, Not):
             sql, parameters = build(current.child)
-            return f"NOT {sql}", parameters
+            # a LIKE on a NULL column is NULL, not FALSE, and NOT NULL would drop the record;
+            # COALESCE treats "no value" as "doesn't match", so -word keeps such records
+            return f"NOT COALESCE({sql}, FALSE)", parameters
         joiner = " AND " if isinstance(current, And) else " OR "
         parts = [build(child) for child in current.children]
         return (

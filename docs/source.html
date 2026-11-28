@@ -32,8 +32,9 @@
       <li class="sub"><a href="#run-code">1. Get the code</a></li>
       <li class="sub"><a href="#run-configure">2. Configure</a></li>
       <li class="sub"><a href="#run-start">3. Start</a></li>
-      <li class="sub"><a href="#run-check">4. Check that it works</a></li>
-      <li class="sub"><a href="#run-stop">5. Stop and reset</a></li>
+      <li class="sub"><a href="#run-load">4. Load the data</a></li>
+      <li class="sub"><a href="#run-check">5. Check that it works</a></li>
+      <li class="sub"><a href="#run-stop">6. Stop and reset</a></li>
       <li class="sub"><a href="#run-trouble">Troubleshooting</a></li>
       <li><a href="#original">Original work beyond AI assistance</a></li>
       <li><a href="#ai">AI usage</a></li>
@@ -76,7 +77,7 @@
     </div>
 
     <h2 id="run">Executable: run it locally</h2>
-    <p>CRKL-Space runs as three services: a <strong>MySQL 8.0</strong> database with our sample data, a <strong>FastAPI</strong> backend, and a <strong>Next.js</strong> frontend. Docker Compose builds and starts all three with one command, so you don't need to install MySQL, Python, or Node.js.</p>
+    <p>CRKL-Space runs as three services: a <strong>MySQL 8.0</strong> database, a <strong>FastAPI</strong> backend, and a <strong>Next.js</strong> frontend. Docker Compose builds and starts all three with one command, so you don't need to install MySQL, Python, or Node.js.</p>
 
     <h3 id="run-need">What you need</h3>
     <ul>
@@ -126,7 +127,7 @@
         <tbody>
           <tr><td><code>docker-compose.yaml</code></td><td>The three services, the order they start in, and the one published port (3000). The backend and database are reachable only inside Docker.</td></tr>
           <tr><td><code>backend/conf/docker.yaml</code></td><td>How the backend connects to MySQL: host <code>mysql</code>, port 3306, user <code>crkl</code>, database <code>crkl_db</code>. The password comes from <code>CRKL_DB_USER_PASSWORD</code> in <code>.env</code>.</td></tr>
-          <tr><td><code>specs/db/DDL.sql</code>, <code>specs/db/dummy_data.sql</code>, <code>docker/mysql/03-app-user.sh</code></td><td>Run by MySQL on the first start, in this order: create the tables, load the sample data, and create the <code>crkl</code> user.</td></tr>
+          <tr><td><code>specs/db/DDL.sql</code>, <code>docker/mysql/03-app-user.sh</code></td><td>Run by MySQL on the first start, in this order: create the tables and create the <code>crkl</code> user. The tables start empty.</td></tr>
         </tbody>
       </table>
     </div>
@@ -134,23 +135,40 @@
     <h3 id="run-start">3. Start</h3>
     <p>In the <code>CRKL</code> folder, run:</p>
     <p class="path"><code>docker compose up --build</code></p>
-    <p>The first start takes a few minutes. Docker downloads the images, builds the backend and frontend, and MySQL creates the database and loads the sample data. Each service waits until the one before it is healthy:</p>
+    <p>The first start takes a few minutes. Docker downloads the images, builds the backend and frontend, and MySQL creates the database with empty tables. Each service waits until the one before it is healthy:</p>
     <ol>
-      <li><strong>mysql</strong> starts and finishes loading the data.</li>
+      <li><strong>mysql</strong> starts and finishes creating the tables.</li>
       <li><strong>backend</strong> starts once it can log in to MySQL as <code>crkl</code>.</li>
       <li><strong>frontend</strong> starts once the backend reports the database as connected.</li>
     </ol>
     <p>Leave this terminal open; the logs of all three services appear in it. Later starts are much faster, because the images and data are kept.</p>
 
-    <h3 id="run-check">4. Check that it works</h3>
+    <h3 id="run-load">4. Load the data</h3>
+    <p>In a second terminal, in the same <code>CRKL</code> folder, load the real data from the Launch Library 2 snapshot files in <code>backend/data/snapshot/</code>. It doesn't call the API and finishes in under a minute:</p>
+    <p class="path"><code>docker compose run --rm load-real-data</code></p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>To…</th><th>Run</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Add the real data (keeps what is already there)</td><td><code>docker compose run --rm load-real-data</code></td></tr>
+          <tr><td>Replace all data with the real data</td><td><code>docker compose run --rm load-real-data --replace</code></td></tr>
+          <tr><td>Replace all data with the fictional sample data used by our tests</td><td><code>docker compose run --rm load-dummy-data --replace</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><code>--replace</code> deletes every mission, agency, spacecraft, launch, and tag first.</p>
+
+    <h3 id="run-check">5. Check that it works</h3>
     <ol>
       <li>Open <a href="http://localhost:3000/explore">http://localhost:3000/explore</a>.</li>
-      <li>With <strong>Missions</strong> selected and <strong>Include related records</strong> checked, search for <code>NASA</code>.</li>
-      <li>You should see <strong>28 results</strong>. Uncheck <strong>Include related records</strong> and search again: <strong>0 results</strong>, because no mission mentions NASA in its own fields.</li>
+      <li>Select <strong>Launches</strong>, keep <strong>Include related records</strong> checked, and search for <code>lunar</code>. Launches also match through their missions' descriptions.</li>
+      <li>Uncheck <strong>Include related records</strong> and search again: only the few launches with "lunar" in their own fields remain.</li>
     </ol>
     <p>See the <a href="instructions.html">Instructions</a> for everything else you can do on the Explore page.</p>
 
-    <h3 id="run-stop">5. Stop and reset</h3>
+    <h3 id="run-stop">6. Stop and reset</h3>
     <div class="table-wrap">
       <table>
         <thead>
@@ -159,7 +177,7 @@
         <tbody>
           <tr><td>Stop the services (data is kept)</td><td>Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in the terminal, then <code>docker compose down</code></td></tr>
           <tr><td>Start again</td><td><code>docker compose up</code></td></tr>
-          <tr><td>Reset the database to the sample data (also applies new passwords from <code>.env</code>)</td><td><code>docker compose down -v</code>, then <code>docker compose up</code></td></tr>
+          <tr><td>Start over with an empty database (also applies new passwords from <code>.env</code>)</td><td><code>docker compose down -v</code>, then <code>docker compose up</code>, then <a href="#run-load">load the data</a> again</td></tr>
         </tbody>
       </table>
     </div>
