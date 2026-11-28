@@ -3,6 +3,13 @@
 #   cp .env.example .env    # then set the passwords
 #   docker compose up --build
 #
+# The database starts empty. To load data, run one of these while it is up:
+#
+#   docker compose run --rm load-real-data    # Launch Library 2 snapshot
+#   docker compose run --rm load-dummy-data   # fictional sample data, for testing
+#
+# Add --replace to either one to delete all existing data first.
+#
 # Open http://localhost:3000/explore. Only the frontend port is published;
 # the backend and database stay on the private Compose network.
 
@@ -17,7 +24,6 @@ services:
       - mysql-data:/var/lib/mysql
       # Run once, in name order, when the data volume is empty.
       - ./specs/db/DDL.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./specs/db/dummy_data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
       - ./docker/mysql/03-app-user.sh:/docker-entrypoint-initdb.d/03-app-user.sh:ro
     healthcheck:
       # TCP login as the app user: fails until init has finished and the
@@ -51,6 +57,35 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
+
+  # One-off loaders, started only with `docker compose run --rm <name>`
+  # (the "tools" profile keeps `docker compose up` from starting them).
+  load-real-data:
+    build: ./backend
+    profiles: ["tools"]
+    environment:
+      CRKL_CONFIG_PATH: /app/conf/docker.yaml
+      CRKL_DB_USER_PASSWORD: ${CRKL_DB_USER_PASSWORD:?set CRKL_DB_USER_PASSWORD in .env}
+    volumes:
+      - ./backend/data/snapshot:/app/data/snapshot:ro
+      - ./docker/backend/load-real-data.sh:/load-real-data.sh:ro
+    entrypoint: ["sh", "/load-real-data.sh"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  load-dummy-data:
+    image: mysql:8.0
+    profiles: ["tools"]
+    environment:
+      CRKL_DB_USER_PASSWORD: ${CRKL_DB_USER_PASSWORD:?set CRKL_DB_USER_PASSWORD in .env}
+    volumes:
+      - ./specs/db/dummy_data.sql:/sample/dummy_data.sql:ro
+      - ./docker/mysql/load-dummy-data.sh:/load-dummy-data.sh:ro
+    entrypoint: ["sh", "/load-dummy-data.sh"]
+    depends_on:
+      mysql:
+        condition: service_healthy
 
 volumes:
   mysql-data:

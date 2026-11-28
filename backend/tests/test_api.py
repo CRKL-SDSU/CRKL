@@ -112,6 +112,18 @@ def test_search_supports_tags_and_operators() -> None:
     assert parameters[1] == "%NASA%"
 
 
+def test_excluded_words_keep_records_with_empty_columns() -> None:
+    # real missions have no status (NULL); "-word" must not drop them
+    with patch("endpoints.fetch_one", return_value={"count": 0}), patch(
+        "endpoints.fetch_all", return_value=[]
+    ) as fetch_all:
+        client.get("/api/v1/missions", params={"search": "apollo -soyuz"})
+
+    query = fetch_all.call_args.args[0]
+    assert "NOT COALESCE((" in query
+    assert query.count("NOT ") == 1
+
+
 def test_malformed_search_returns_bad_request() -> None:
     response = client.get("/api/v1/missions", params={"search": "(mars"})
 

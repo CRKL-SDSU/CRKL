@@ -5,6 +5,9 @@ CRKL-Space is a searchable catalog of space missions, agencies, spacecraft,
 and launches: a MySQL database, a FastAPI backend, and a Next.js frontend.
 Project website: <https://crkl-sdsu.github.io/CRKL/>
 
+**Graders:** see [GRADING.md](GRADING.md) for starting the app, loading the
+real data, and what to try.
+
 ## Original work and AI usage
 
 We used AI coding assistants during development, as allowed by the CS 514 AI
@@ -76,9 +79,10 @@ encourage caching it instead of querying the API from every client.
   so real spacecraft have no related missions yet. The sample data has more
   relationships than the real data for this reason.
 - **Sample data:** the records in `specs/db/dummy_data.sql` are fictional
-  sample data in the Launch Library 2 format, kept for tests and grading.
-  Their `source_provider` is `dummy`, so the site labels them "Source: Dummy"
-  and never presents them as Launch Library 2 records.
+  sample data in the Launch Library 2 format, kept for testing. They are not
+  loaded by default (see [Load data](#load-data)). Their `source_provider` is
+  `dummy`, so the site labels them "Source: Dummy" and never presents them as
+  Launch Library 2 records.
 
 ## Search syntax and tags
 
@@ -105,8 +109,8 @@ spaces, and hyphens, and are at most 30 characters; a mission can have up to
 10 tags. Clicking a tag on a result card or in a detail view searches for it.
 
 After pulling this change, recreate the database so the new tables exist:
-`docker compose down -v && docker compose up --build`, or rerun `DDL.sql` and
-`dummy_data.sql` for a local MySQL.
+`docker compose down -v && docker compose up --build`, or rerun `DDL.sql` for
+a local MySQL, then [load the data](#load-data) again.
 
 ## Start the servers
 
@@ -119,7 +123,7 @@ There are two ways to run CRKL-Space. Both serve the app at
 | Start | `docker compose up --build` | `scripts/dev.sh` |
 | Stop | `docker compose down` | Ctrl+C |
 | You need | Docker Desktop only | Homebrew MySQL 8.0, Python 3.12, Node.js 20 |
-| Database | `mysql-data` Docker volume, sample data loaded automatically | Your Homebrew MySQL `crkl_db` |
+| Database | `mysql-data` Docker volume, empty until you [load data](#load-data) | Your Homebrew MySQL `crkl_db` |
 | Code changes | Rebuild: `docker compose up -d --build <service>` | Picked up on save (auto-reload) |
 
 The two setups use separate databases: data changed in one does not appear in
@@ -127,8 +131,7 @@ the other.
 
 ### A. Docker
 
-Docker Compose starts MySQL (with the sample data), the FastAPI backend, and
-the Next.js frontend. You only need
+Docker Compose starts MySQL, the FastAPI backend, and the Next.js frontend. You only need
 [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
 To run the exact version submitted for Phase 1, use the `phase1` tag:
@@ -142,15 +145,35 @@ docker compose up --build
 Open <http://localhost:3000/explore>. Only port 3000 is published; the backend
 and database are reachable only inside the Compose network.
 
-On first start, MySQL runs `specs/db/DDL.sql`, `specs/db/dummy_data.sql`, and
-`docker/mysql/03-app-user.sh`. The data is kept in the `mysql-data` volume
+On first start, MySQL runs `specs/db/DDL.sql` and
+`docker/mysql/03-app-user.sh`, so the database starts with empty tables.
+Then [load data](#load-data). The data is kept in the `mysql-data` volume
 across restarts, and the passwords in `.env` are applied only on that first
-start. To reset the database and reload the sample data:
+start. To start over with an empty database:
 
 ```bash
 docker compose down -v
 docker compose up
 ```
+
+#### Load data
+
+While the services are running, load data from a second terminal:
+
+| To… | Run |
+| --- | --- |
+| Add the real data from the Launch Library 2 snapshot | `docker compose run --rm load-real-data` |
+| Replace all data with the real data | `docker compose run --rm load-real-data --replace` |
+| Load the sample data into an empty database | `docker compose run --rm load-dummy-data` |
+| Replace all data with the sample data | `docker compose run --rm load-dummy-data --replace` |
+
+- `load-real-data` runs the ETL on the snapshot files in
+  `backend/data/snapshot/` and does not call the API. Rerunning it updates the
+  real records instead of adding duplicates, and keeps any sample data.
+- The sample data uses fixed IDs, so without `--replace` it only loads into an
+  empty database.
+- `--replace` deletes every mission, agency, spacecraft, launch, and tag
+  (including tags added on the site) before loading.
 
 ### B. Local (without Docker)
 
@@ -160,8 +183,9 @@ prefixes their logs with `[backend]` and `[frontend]`.
 
 **One-time setup**
 
-1. Install and start MySQL 8.0, then create the database, sample data, and
-   the `crkl` user as described in [`specs/db/README.md`](specs/db/README.md):
+1. Install and start MySQL 8.0, then create the database and the `crkl`
+   user, and load data, as described in
+   [`specs/db/README.md`](specs/db/README.md):
 
    ```bash
    brew install mysql@8.0
