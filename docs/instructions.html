@@ -35,6 +35,7 @@
       <li class="sub"><a href="#results">Read the results</a></li>
       <li><a href="#details">Explore: viewing details</a></li>
       <li class="sub"><a href="#links">Following links</a></li>
+      <li class="sub"><a href="#tags">Tags</a></li>
       <li class="sub"><a href="#controls">Panel controls</a></li>
       <li><a href="#messages">Messages you may see</a></li>
     </ul>
@@ -52,26 +53,22 @@
     <p>CRKL-Space runs on your own computer with Docker. Follow <a href="source.html#run">Executable: run it locally</a> on the Source Code page for the requirements, the configuration file, and the start command, then open <a href="http://localhost:3000/explore">http://localhost:3000/explore</a>.</p>
 
     <h2 id="catalog">What's in the catalog</h2>
+    <p>After you <a href="source.html#run-load">load the real data</a>, the catalog holds missions, agencies, spacecraft, and launches from <a href="https://thespacedevs.com/llapi">Launch Library 2</a>. Each record shows its source at the bottom: <em>Source: Launch Library 2</em> for real data, or <em>Source: Dummy</em> for the fictional sample data used by our tests.</p>
     <div class="table-wrap">
       <table>
         <thead>
           <tr><th>Resource</th><th>What it describes</th><th>Example</th></tr>
         </thead>
         <tbody>
-          <tr><td><strong>Missions</strong></td><td>A space mission, its target body, and its status</td><td><em>Mercury Magnetospheric Boundary Mapper</em></td></tr>
-          <tr><td><strong>Agencies</strong></td><td>An organization taking part in missions</td><td><em>NASA</em>, <em>ESA</em>, <em>JAXA</em>, <em>SpaceX</em>, <em>ISRO</em></td></tr>
-          <tr><td><strong>Spacecraft</strong></td><td>A vehicle or instrument platform</td><td><em>Orion Deep Space Variant</em></td></tr>
-          <tr><td><strong>Launches</strong></td><td>A launch event with its date, window, and status</td><td><em>Falcon Heavy Interplanetary</em></td></tr>
+          <tr><td><strong>Missions</strong></td><td>A space mission and its description</td><td><em>Apollo 11</em>, <em>Gemini IV (Gemini 4)</em></td></tr>
+          <tr><td><strong>Agencies</strong></td><td>A space agency or company, with its abbreviation and country</td><td><em>National Aeronautics and Space Administration</em> (NASA), <em>European Space Agency</em> (ESA)</td></tr>
+          <tr><td><strong>Spacecraft</strong></td><td>A spacecraft and its type</td><td><em>Apollo Columbia CSM-107</em> (Capsule)</td></tr>
+          <tr><td><strong>Launches</strong></td><td>A launch with its date, window, status, and launch provider</td><td><em>Saturn V | Apollo 11</em></td></tr>
         </tbody>
       </table>
     </div>
-    <p>Missions are the center of the catalog. Each mission can be linked to:</p>
-    <ul>
-      <li>several <strong>agencies</strong>, each with a role such as <em>Primary</em> or <em>Contributor</em></li>
-      <li>several <strong>spacecraft</strong></li>
-      <li>several <strong>launches</strong></li>
-    </ul>
-    <p>Agencies, spacecraft, and launches are connected to each other <strong>through missions</strong>. For example, to find the spacecraft an agency has used, open the agency, open one of its missions, then look at that mission's spacecraft.</p>
+    <p>Missions are the center of the catalog. Each mission can be linked to several <strong>agencies</strong>, <strong>spacecraft</strong>, and <strong>launches</strong>, and agencies, spacecraft, and launches are connected to each other <strong>through missions</strong>. Each launch also names its <strong>launch provider</strong>, the agency that carried it out.</p>
+    <p class="note"><strong>Note:</strong> Relationships are loaded as Launch Library 2 records them. It lists the agencies behind only a few missions, and the data we load doesn't say which spacecraft flew on a launch, so most real agencies and spacecraft have few or no related missions. Launches are linked to their missions.</p>
 
     <h2 id="searching">Explore: searching the catalog</h2>
     <p>Open <a href="http://localhost:3000/explore">http://localhost:3000/explore</a>.</p>
@@ -81,10 +78,25 @@
 
     <h3 id="keyword">Type a keyword and press Search</h3>
     <ul>
-      <li>Search is <strong>case-insensitive</strong> and matches <strong>anywhere inside</strong> a field. <code>orbit</code> finds <em>Martian Phobos Orbital Insertion</em>.</li>
-      <li>Multi-word input is treated as <strong>one phrase</strong>, not separate words. <code>solar observatory</code> matches <em>Aditya-L1 Solar Observatory</em> but not a record that only contains "solar" and "observatory" far apart.</li>
-      <li>Leave the box <strong>empty</strong> and press Search to list <strong>all</strong> records of the selected type.</li>
+      <li>Search is <strong>case-insensitive</strong> and matches <strong>anywhere inside</strong> a field. <code>gemini</code> finds <em>Gemini IV (Gemini 4)</em>.</li>
+      <li>Leave the box <strong>empty</strong> and press Search to list records of the selected type.</li>
     </ul>
+    <p>The search box accepts Gmail-style queries:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Query</th><th>Matches</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>apollo lunar</code></td><td>records matching both words (AND is the default)</td></tr>
+          <tr><td><code>apollo OR gemini</code></td><td>either word (<code>OR</code> must be uppercase)</td></tr>
+          <tr><td><code>apollo -soyuz</code></td><td>records that do <strong>not</strong> match the word</td></tr>
+          <tr><td><code>"saturn v"</code></td><td>the exact phrase</td></tr>
+          <tr><td><code>tag:moon</code></td><td>missions with that tag; other types match through their missions (see <a href="#tags">Tags</a>)</td></tr>
+          <tr><td><code>(apollo OR gemini) -test</code></td><td>parentheses group terms</td></tr>
+        </tbody>
+      </table>
+    </div>
     <p>Fields searched for each type:</p>
     <div class="table-wrap">
       <table>
@@ -92,10 +104,10 @@
           <tr><th>Searching in</th><th>Matches on</th></tr>
         </thead>
         <tbody>
-          <tr><td>Missions</td><td>name, description, target body, status, source provider</td></tr>
-          <tr><td>Agencies</td><td>name, abbreviation, country code, source provider</td></tr>
-          <tr><td>Spacecraft</td><td>name, spacecraft type, source provider</td></tr>
-          <tr><td>Launches</td><td>name, status, source provider</td></tr>
+          <tr><td>Missions</td><td>name, description, target body, status, source, source ID</td></tr>
+          <tr><td>Agencies</td><td>name, abbreviation, country code, source, source ID</td></tr>
+          <tr><td>Spacecraft</td><td>name, spacecraft type, source, source ID</td></tr>
+          <tr><td>Launches</td><td>name, status, source, source ID</td></tr>
         </tbody>
       </table>
     </div>
@@ -113,16 +125,16 @@
         </tbody>
       </table>
     </div>
-    <p>Examples:</p>
+    <p>Examples with the real data:</p>
     <div class="table-wrap">
       <table>
         <thead>
           <tr><th>Search in</th><th>Keyword</th><th>Related on</th><th>Related off</th></tr>
         </thead>
         <tbody>
-          <tr><td>Missions</td><td><code>NASA</code></td><td>Every mission NASA takes part in</td><td>Only missions with "NASA" in their own text</td></tr>
-          <tr><td>Spacecraft</td><td><code>Moon</code></td><td>Spacecraft that flew on Moon missions</td><td>Only spacecraft with "Moon" in their name/type</td></tr>
-          <tr><td>Launches</td><td><code>Mars</code></td><td>Launches carrying Mars missions</td><td>Only launches with "Mars" in their name</td></tr>
+          <tr><td>Launches</td><td><code>lunar</code></td><td>Also launches whose mission description mentions "lunar"</td><td>Only the few launches with "lunar" in their own fields</td></tr>
+          <tr><td>Missions</td><td><code>"saturn v"</code></td><td>Missions flown on a Saturn V launch, such as <em>Apollo 4</em> and <em>Apollo 8</em></td><td>Only missions that mention "Saturn V" in their own text</td></tr>
+          <tr><td>Agencies</td><td><code>apollo</code></td><td><em>NASA</em>, through its Apollo missions</td><td>No results: no agency mentions Apollo in its own fields</td></tr>
         </tbody>
       </table>
     </div>
@@ -131,23 +143,31 @@
     <h3 id="results">Read the results</h3>
     <p>The heading shows how many results are displayed and how many records matched in total. Each result card shows:</p>
     <ul>
-      <li>the record type and its <strong>#ID</strong></li>
-      <li>the record name</li>
-      <li>a few key fields</li>
+      <li>a thumbnail image, or an icon for the record type when there is no image</li>
+      <li>the record type and name</li>
+      <li>a few key fields, such as a launch's date, status, and launch provider; empty values show as <code>—</code></li>
+      <li>a mission's tags</li>
+      <li>the source and source ID, in small type</li>
     </ul>
-    <p class="note"><strong>Note:</strong> Explore displays up to <strong>100</strong> results per search. If more records match, use a more specific keyword.</p>
+    <p class="note"><strong>Note:</strong> Explore displays up to <strong>100</strong> results per search. If more records match, use a more specific query.</p>
 
     <h2 id="details">Explore: viewing details</h2>
     <p>Click any result card to open its <strong>detail panel</strong>.</p>
     <p>The panel shows:</p>
     <ol>
-      <li><strong>All fields</strong> of the record (dates, status, …). Empty values are shown as <code>—</code>.</li>
-      <li><strong>Related records</strong>, grouped by type. A mission shows its <em>agencies</em> (including each agency's role), <em>spacecraft</em>, and <em>launches</em>. An agency, spacecraft, or launch shows its <em>missions</em>.</li>
+      <li>The <strong>image</strong>, with its credit and license when Launch Library 2 provides them.</li>
+      <li>The record's <strong>fields</strong>, the same list for every record of a type. Empty values are shown as <code>—</code>.</li>
+      <li><strong>Related records</strong>, grouped by type. A mission shows its <em>agencies</em>, <em>spacecraft</em>, and <em>launches</em>. An agency, spacecraft, or launch shows its <em>missions</em>.</li>
+      <li>For a mission, its <strong>tags</strong>, where you can add or remove tags.</li>
+      <li>At the bottom, the <strong>source</strong> and when the record was added and updated, and a small <strong>copy icon</strong>. It copies a prompt for an AI assistant with the record's details and links to its Launch Library 2 data, for finding primary sources and more detail.</li>
     </ol>
 
     <h3 id="links">Following links</h3>
     <p>Click any related record to open it <strong>in the same panel</strong>. This lets you walk through the catalog, e.g.:</p>
-    <p class="path"><strong>NASA</strong> → <em>Lunar South Pole Habitation Scout</em> → <em>Orion Deep Space Variant</em> → every mission Orion flew on</p>
+    <p class="path"><strong>National Aeronautics and Space Administration</strong> → <em>Apollo 11</em> → <em>Apollo LM | Apollo 11</em></p>
+
+    <h3 id="tags">Tags</h3>
+    <p>Tags are labels anyone can add to a mission in its detail panel; there is no login yet. Tag names are stored in lowercase, can use letters, digits, spaces, and hyphens, and are at most 30 characters; a mission can have up to 10 tags. Click a tag on a result card or in a detail panel to search for it, or type <code>tag:moon</code>, or <code>tag:"ocean worlds"</code> for a tag with spaces.</p>
 
     <h3 id="controls">Panel controls</h3>
     <div class="table-wrap">
@@ -174,7 +194,8 @@
         </thead>
         <tbody>
           <tr><td><em>Start exploring</em></td><td>No search has been run yet for this type.</td></tr>
-          <tr><td><em>No records matched your search.</em></td><td>The search ran, but nothing matched. Try a shorter keyword or turn on related records.</td></tr>
+          <tr><td><em>No records matched your search.</em></td><td>The search ran, but nothing matched. Try a shorter keyword or turn on related records. If the whole catalog is empty, <a href="source.html#run-load">load the data</a> first.</td></tr>
+          <tr><td><em>A parenthesis is missing a closing ')'.</em> and similar</td><td>The query is malformed. Fix it as the message says.</td></tr>
           <tr><td><code>API returned 404 Not Found</code></td><td>That record ID does not exist.</td></tr>
           <tr><td><code>API returned 502 Bad Gateway</code></td><td>The frontend cannot reach the backend. Is it running?</td></tr>
           <tr><td><code>API returned 503 Service Unavailable</code></td><td>The backend cannot reach MySQL.</td></tr>
