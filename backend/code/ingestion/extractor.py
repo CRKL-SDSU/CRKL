@@ -201,12 +201,16 @@ def fetch_agencies() -> list[dict]:
 
 
 # function that will fetch the spacecraft from the LL2 API
-def fetch_spacecraft() -> list[dict]:
+def fetch_spacecraft(refresh: bool = False, use_cache: bool = True) -> list[dict]:
     """
     Retrieves all spacecraft records from the LL2 API
+
+    Args:
+        refresh: determines if a checkpoint should be cleansed or used
+        use_cache: determines whether to use an existing completed cache
     """
 
-    return fetch_all_pages("/spacecraft/")
+    return fetch_all_pages("/spacecraft/", extra_params = {"ordering": "id"}, refresh = refresh, use_cache = use_cache)
 
 # function that will fetch the launches records from the LL2 API
 # NOTE: unlike the agencies & spacecraft, launches requires more work & retrieval because mission records rely on nested information within launch records
